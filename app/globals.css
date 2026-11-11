@@ -1,0 +1,309 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *, .dark, .dark *));
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-bone: var(--bone);
+  --color-signal: var(--signal);
+  --color-teal: var(--teal);
+  --color-steel: var(--steel);
+
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-instrument-serif), ui-serif, Georgia, serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, 'SFMono-Regular', monospace;
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+
+  /* Sharp corners: every radius token is capped at 2px. */
+  --radius-xs: 1px;
+  --radius-sm: var(--radius);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius);
+  --radius-2xl: var(--radius);
+  --radius-3xl: var(--radius);
+  --radius-4xl: var(--radius);
+}
+
+:root {
+  --ink: #0e1013;
+  --bone: #f1ece2;
+  --signal: #ff5a1f;
+  --teal: #0f3d3e;
+  --steel: #8a93a0;
+
+  --radius: 2px;
+  --nav-height: 4rem;
+  --grain-opacity: 0.03;
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1.6 0 0 0 -0.3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+/* Light surface (default): bone paper, ink type. */
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+  --background: var(--bone);
+  --foreground: var(--ink);
+  --card: var(--bone);
+  --card-foreground: var(--ink);
+  --popover: var(--bone);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--bone);
+  --secondary: color-mix(in oklab, var(--ink) 6%, var(--bone));
+  --secondary-foreground: var(--ink);
+  --muted: color-mix(in oklab, var(--ink) 6%, var(--bone));
+  /* Steel is too light for text on bone (2.6:1), so muted text is a tinted ink here. */
+  --muted-foreground: color-mix(in oklab, var(--ink) 68%, var(--bone));
+  --accent: color-mix(in oklab, var(--ink) 9%, var(--bone));
+  --accent-foreground: var(--ink);
+  --destructive: #b3261e;
+  --border: color-mix(in oklab, var(--ink) 18%, transparent);
+  --input: color-mix(in oklab, var(--ink) 30%, transparent);
+  --ring: var(--signal);
+  /* Orange alone is 2.6:1 on bone, so focus pairs it with an ink hairline. */
+  --focus-hairline: var(--ink);
+  --chart-1: var(--signal);
+  --chart-2: var(--teal);
+  --chart-3: var(--steel);
+  --chart-4: var(--ink);
+  --chart-5: color-mix(in oklab, var(--teal) 50%, var(--bone));
+  --sidebar: var(--bone);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--ink);
+  --sidebar-primary-foreground: var(--bone);
+  --sidebar-accent: color-mix(in oklab, var(--ink) 9%, var(--bone));
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: color-mix(in oklab, var(--ink) 18%, transparent);
+  --sidebar-ring: var(--signal);
+}
+
+/* Dark surface: ink ground, bone type, steel for secondary text. */
+[data-theme='dark'],
+.dark {
+  color-scheme: dark;
+  --background: var(--ink);
+  --foreground: var(--bone);
+  --card: color-mix(in oklab, var(--bone) 4%, var(--ink));
+  --card-foreground: var(--bone);
+  --popover: color-mix(in oklab, var(--bone) 4%, var(--ink));
+  --popover-foreground: var(--bone);
+  --primary: var(--bone);
+  --primary-foreground: var(--ink);
+  --secondary: color-mix(in oklab, var(--bone) 8%, var(--ink));
+  --secondary-foreground: var(--bone);
+  --muted: color-mix(in oklab, var(--bone) 8%, var(--ink));
+  --muted-foreground: var(--steel);
+  --accent: color-mix(in oklab, var(--bone) 11%, var(--ink));
+  --accent-foreground: var(--bone);
+  --destructive: #ff6b5e;
+  --border: color-mix(in oklab, var(--bone) 16%, transparent);
+  --input: color-mix(in oklab, var(--bone) 26%, transparent);
+  --ring: var(--signal);
+  --focus-hairline: transparent;
+  --chart-1: var(--signal);
+  --chart-2: var(--steel);
+  --chart-3: var(--bone);
+  --chart-4: color-mix(in oklab, var(--teal) 55%, var(--bone));
+  --chart-5: color-mix(in oklab, var(--steel) 50%, var(--ink));
+  --sidebar: var(--ink);
+  --sidebar-foreground: var(--bone);
+  --sidebar-primary: var(--bone);
+  --sidebar-primary-foreground: var(--ink);
+  --sidebar-accent: color-mix(in oklab, var(--bone) 11%, var(--ink));
+  --sidebar-accent-foreground: var(--bone);
+  --sidebar-border: color-mix(in oklab, var(--bone) 16%, transparent);
+  --sidebar-ring: var(--signal);
+}
+
+/* Teal surface: a second dark ground for the occasional feature section. */
+[data-theme='teal'] {
+  color-scheme: dark;
+  --background: var(--teal);
+  --foreground: var(--bone);
+  --card: color-mix(in oklab, var(--bone) 5%, var(--teal));
+  --card-foreground: var(--bone);
+  --popover: color-mix(in oklab, var(--bone) 5%, var(--teal));
+  --popover-foreground: var(--bone);
+  --primary: var(--bone);
+  --primary-foreground: var(--teal);
+  --secondary: color-mix(in oklab, var(--bone) 9%, var(--teal));
+  --secondary-foreground: var(--bone);
+  --muted: color-mix(in oklab, var(--bone) 9%, var(--teal));
+  --muted-foreground: color-mix(in oklab, var(--bone) 72%, var(--teal));
+  --accent: color-mix(in oklab, var(--bone) 12%, var(--teal));
+  --accent-foreground: var(--bone);
+  --destructive: #ff8a7f;
+  --border: color-mix(in oklab, var(--bone) 18%, transparent);
+  --input: color-mix(in oklab, var(--bone) 28%, transparent);
+  --ring: var(--signal);
+  --focus-hairline: transparent;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .has-custom-cursor,
+    .has-custom-cursor * {
+      cursor: none !important;
+    }
+
+  }
+
+  [data-theme] {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-serif font-normal tracking-tight text-balance;
+  }
+
+  ::selection {
+    background-color: var(--signal);
+    color: var(--ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 1px var(--focus-hairline);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      transition-delay: 0ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Film grain for dark surfaces. Lives in the components layer so `fixed`,
+     `sticky` and `absolute` utilities can still set the element's position. */
+  .grain {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background-image: var(--grain);
+    background-size: 220px 220px;
+    opacity: var(--grain-opacity);
+  }
+
+  /* RevealText: keep copy hidden until its lines are split, but only when
+     scripting runs and motion is welcome, so it can never get stuck hidden. */
+  @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+    [data-reveal='pending'] {
+      visibility: hidden;
+    }
+  }
+
+  /* Give line masks room for descenders without changing the line box. */
+  .reveal-line-mask {
+    padding-bottom: 0.14em;
+    margin-bottom: -0.14em;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .has-custom-cursor [data-global-cursor] {
+    display: flex;
+  }
+
+  [data-global-cursor][data-cursor-active='true'] {
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--signal);
+    background: transparent;
+  }
+
+  [data-global-cursor][data-cursor-active='true'] [data-cursor-dot] {
+    transform: scale(0);
+  }
+
+  [data-global-cursor][data-cursor-label='View'] {
+    width: 4rem;
+    height: 2.5rem;
+    border: 0;
+    background: var(--signal);
+  }
+
+  [data-global-cursor][data-cursor-label='View'] [data-cursor-text] {
+    display: block;
+  }
+}
+
+@utility hairline {
+  width: 100%;
+  height: 1px;
+  flex-shrink: 0;
+  border: 0;
+  background-color: var(--border);
+}
+
+@utility hairline-v {
+  width: 1px;
+  flex-shrink: 0;
+  align-self: stretch;
+  border: 0;
+  background-color: var(--border);
+}
