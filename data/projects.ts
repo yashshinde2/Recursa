@@ -3,6 +3,7 @@ export type Project = {
   name: string
   category: string
   image: string
+  video?: string
   imageAlt: string
   url: string
   problem: string
@@ -16,6 +17,7 @@ export const PROJECTS = [
     name: 'House of 666',
     category: 'Website · Restaurant & Café',
     image: '/work/house-of-666.webp',
+    video: '/work/videos/house-of-666.mp4',
     imageAlt: 'House of 666 Resto & Cafe website homepage with gold palm trees',
     url: 'https://house-of-666.netlify.app/',
     problem: 'A new Kolhapur café needed an online presence that matched its royal, coastal feel.',
@@ -27,6 +29,7 @@ export const PROJECTS = [
     name: 'Dhanshri Foods',
     category: 'E-commerce · Food Manufacturing',
     image: '/work/dhanshri-foods.webp',
+    video: '/work/videos/dhanshri-foods.mp4',
     imageAlt: 'Dhanshri Foods e-commerce homepage with namkeen and chips',
     url: 'https://dhanashri-foods.netlify.app/',
     problem: 'A chips and namkeen maker wanted to sell retail and take bulk B2B orders online.',
@@ -38,6 +41,7 @@ export const PROJECTS = [
     name: 'Murti Maker Pro',
     category: 'Web App · Automation · Silver Jewellery',
     image: '/work/murti-maker-pro.webp',
+    video: '/work/videos/murti-maker-pro.mp4',
     imageAlt: 'Silver idol catalogue app for Roukhar Brothers with search and filters',
     url: 'https://murti-maker-pro.lovable.app/',
     problem: 'A silver idol maker was quoting orders by hand across 99 products.',
@@ -49,6 +53,7 @@ export const PROJECTS = [
     name: 'KD Export',
     category: 'Website · CRM Software · Agri Export',
     image: '/work/kd-export.webp',
+    video: '/work/videos/kd-export.mp4',
     imageAlt: 'KD Export banana supplier website with export statistics',
     url: 'https://kdexport.co.in/',
     problem: 'A banana exporter and cold-storage company needed a credible web presence and a way to manage farmers and clients.',

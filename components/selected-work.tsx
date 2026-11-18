@@ -81,25 +81,25 @@ export function SelectedWork() {
       id="work"
       ref={sectionRef}
       data-theme="light"
-      className="relative overflow-hidden bg-bone py-20 text-ink md:py-28"
+      className="relative overflow-hidden bg-bone py-16 text-ink md:flex md:h-svh md:min-h-[660px] md:flex-col md:justify-between md:py-10"
     >
-      <div className="mx-auto w-full max-w-[1440px] px-5 md:px-8">
+      <div className="mx-auto w-full max-w-[1440px] shrink-0 px-5 md:px-8">
         <SectionLabel>04 / Selected work</SectionLabel>
       </div>
 
       <div
         ref={viewportRef}
-        className="relative mt-8 w-full overflow-hidden px-5 md:mt-12 md:px-8 md:motion-reduce:overflow-visible"
+        className="relative mt-8 flex w-full flex-1 items-center overflow-hidden px-5 md:mt-0 md:px-8 md:motion-reduce:overflow-visible"
       >
         <div
           ref={trackRef}
-          className="flex flex-col gap-14 md:gap-10 md:motion-reduce:flex-col md:motion-reduce:w-full md:motion-safe:flex-row md:motion-safe:w-max md:motion-safe:items-start md:motion-safe:pr-8"
+          className="flex w-full flex-col gap-16 md:gap-10 md:motion-reduce:flex-col md:motion-reduce:w-full md:motion-safe:flex-row md:motion-safe:w-max md:motion-safe:items-center md:motion-safe:pr-8"
         >
           {PROJECTS.map((project, index) => (
             <article
               key={project.slug}
               data-project-card
-              className="group flex w-full flex-col md:motion-reduce:w-full md:motion-safe:w-[70vw] md:motion-safe:shrink-0"
+              className="group grid w-full grid-cols-1 gap-6 md:motion-reduce:grid-cols-1 md:motion-reduce:w-full md:motion-safe:w-[min(82vw,1080px)] md:motion-safe:shrink-0 md:motion-safe:grid-cols-[1.15fr_0.85fr] md:motion-safe:items-center md:motion-safe:gap-10"
             >
               <a
                 href={project.url}
@@ -109,19 +109,22 @@ export function SelectedWork() {
                 aria-hidden="true"
                 className="relative block aspect-[16/9] w-full overflow-hidden rounded-[2px] border border-ink/15 bg-ink/5"
               >
-                <Image
-                  src={project.image}
-                  alt={project.imageAlt}
-                  fill
-                  sizes="(min-width: 768px) 70vw, 100vw"
-                  priority={index === 0}
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-                />
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="metadata"
+                  poster={project.image}
+                  className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                >
+                  {project.video && <source src={project.video} type="video/mp4" />}
+                </video>
               </a>
 
-              <div className="mt-6 flex flex-col gap-4">
-                <div className="flex flex-col gap-1 md:flex-row md:items-baseline md:justify-between">
-                  <h3 className="font-serif text-3xl leading-tight text-ink md:text-5xl">
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1">
+                  <h3 className="font-serif text-3xl leading-tight text-ink md:text-4xl lg:text-5xl">
                     {project.name}
                   </h3>
                   <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
@@ -129,7 +132,7 @@ export function SelectedWork() {
                   </p>
                 </div>
 
-                <dl className="mt-2 space-y-2 border-t border-ink/15 pt-3">
+                <dl className="space-y-2.5 border-t border-ink/15 pt-3">
                   <div className="grid grid-cols-[5.5rem_1fr] gap-3 text-sm md:text-base">
                     <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
                       Problem
