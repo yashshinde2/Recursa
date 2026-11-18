@@ -19,3 +19,10 @@ export const PRIMARY_CTA = {
   label: 'Start a project',
   href: '#contact',
 } as const
+
+export const HERO = {
+  description:
+    'Recursa Technologies builds SaaS, web, mobile and IoT products for businesses that want to move. Born in hackathons, proven in production.',
+  storyLabel: 'See our story',
+  storyHref: '#journey',
+} as const

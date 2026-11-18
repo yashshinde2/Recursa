@@ -4,8 +4,8 @@ import { useRef } from 'react'
 
 import { HeroSquares } from '@/components/home/hero-squares'
 import { MagneticButton } from '@/components/magnetic-button'
-import { gsap, SplitText, useGSAP } from '@/lib/gsap'
-import { PRIMARY_CTA } from '@/lib/site'
+import { gsap, useGSAP } from '@/lib/gsap'
+import { HERO, PRIMARY_CTA } from '@/lib/site'
 
 type HeroProps = {
   /** False while the loader still covers the page; the intro waits for it. */
@@ -25,30 +25,39 @@ export function Hero({ ready }: HeroProps) {
       media.add('(prefers-reduced-motion: no-preference)', () => {
         const select = gsap.utils.selector(section)
         const headline = select('[data-hero-headline]')[0] as HTMLElement
+        const lines = select('[data-hero-line]') as HTMLElement[]
+        const underline = select('[data-hero-underline]')[0] as HTMLElement
         const squares = select('[data-hero-squares]')[0] as HTMLElement
         const items = select('[data-hero-item]') as HTMLElement[]
         const cue = select('[data-hero-cue]')[0]
 
-        const split = SplitText.create(headline, {
-          type: 'lines',
-          mask: 'lines',
-          linesClass: 'reveal-line',
-          autoSplit: true,
-          aria: 'none',
-          onSplit: (self) => {
-            headline.dataset.reveal = 'ready'
-
-            return gsap.from(self.lines, {
-              yPercent: 115,
-              duration: 1.3,
-              stagger: 0.12,
-              ease: 'power3.out',
-            })
-          },
-        })
-
+        headline.dataset.reveal = 'ready'
         for (const element of [squares, ...items]) {
           element.dataset.reveal = 'ready'
+        }
+
+        gsap.fromTo(
+          lines,
+          { yPercent: 115 },
+          {
+            yPercent: 0,
+            duration: 1.3,
+            stagger: 0.12,
+            ease: 'power3.out',
+          },
+        )
+
+        if (underline) {
+          gsap.fromTo(
+            underline,
+            { scaleX: 0 },
+            {
+              scaleX: 1,
+              duration: 0.9,
+              delay: 0.75,
+              ease: 'power3.out',
+            },
+          )
         }
 
         gsap.fromTo(
@@ -82,8 +91,24 @@ export function Hero({ ready }: HeroProps) {
             repeatDelay: 0.2,
           },
         )
+      })
 
-        return () => split.revert()
+      media.add('(prefers-reduced-motion: reduce)', () => {
+        const select = gsap.utils.selector(section)
+        const headline = select('[data-hero-headline]')[0] as HTMLElement
+        const lines = select('[data-hero-line]') as HTMLElement[]
+        const underline = select('[data-hero-underline]')[0] as HTMLElement
+        const squares = select('[data-hero-squares]')[0] as HTMLElement
+        const items = select('[data-hero-item]') as HTMLElement[]
+
+        if (headline) headline.dataset.reveal = 'ready'
+        for (const element of [squares, ...items]) {
+          if (element) element.dataset.reveal = 'ready'
+        }
+        gsap.set(lines, { yPercent: 0 })
+        if (underline) gsap.set(underline, { scaleX: 1 })
+        if (squares) gsap.set(squares, { autoAlpha: 1, scale: 1 })
+        gsap.set(items, { autoAlpha: 1, y: 0 })
       })
 
       return () => media.revert()
@@ -105,41 +130,62 @@ export function Hero({ ready }: HeroProps) {
           id="hero-heading"
           data-hero-headline
           data-reveal="pending"
-          className="text-[clamp(3.5rem,10vw,10.5rem)] leading-[0.95]"
+          className="text-[clamp(2.2rem,min(9vw,15svh),8.5rem)] leading-[0.93] font-normal"
         >
-          We build.
-          <br />
-          Then we build <em>better.</em>
+          <span className="block overflow-hidden pb-1 -mb-1">
+            <span data-hero-line className="block whitespace-nowrap">
+              Big problems are
+            </span>
+          </span>
+          <span className="block overflow-hidden pb-1 -mb-1">
+            <span data-hero-line className="block whitespace-nowrap">
+              just small ones,
+            </span>
+          </span>
+          <span className="block overflow-hidden pb-1.5 -mb-1.5">
+            <span data-hero-line className="block whitespace-nowrap">
+              <span className="relative inline-block font-serif italic">
+                called again.
+                <span
+                  data-hero-underline
+                  className="absolute left-0 bottom-0.5 h-[2px] w-full origin-left bg-signal"
+                />
+              </span>
+            </span>
+          </span>
         </h1>
 
-        <p
-          data-hero-item
-          data-reveal="pending"
-          className="mt-8 font-mono text-xs tracking-[0.2em] text-muted-foreground uppercase md:mt-10 md:text-sm"
-        >
-          {'SaaS · Web · Mobile · IoT'}
-        </p>
-
-        <div
-          data-hero-item
-          data-reveal="pending"
-          className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4 md:mt-12"
-        >
-          <MagneticButton href={PRIMARY_CTA.href} size="lg">
-            {PRIMARY_CTA.label}
-          </MagneticButton>
-          <a
-            href="#journey"
-            className="group relative inline-flex items-center gap-2 py-2 after:absolute after:inset-x-0 after:bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-current after:transition-[scale] after:duration-500 after:ease-out hover:after:scale-x-100"
+        <div className="mt-10 flex flex-col gap-8 md:mt-14 md:flex-row md:items-end md:justify-between md:gap-12">
+          <p
+            data-hero-item
+            data-reveal="pending"
+            className="max-w-[34rem] font-sans text-base leading-relaxed text-muted-foreground md:text-lg"
           >
-            See our story
-            <span
-              aria-hidden="true"
-              className="transition-[translate] duration-500 ease-out group-hover:translate-y-1"
+            <span className="text-foreground">Recursa Technologies</span>{' '}
+            {HERO.description.slice('Recursa Technologies'.length).trimStart()}
+          </p>
+
+          <div
+            data-hero-item
+            data-reveal="pending"
+            className="flex shrink-0 flex-wrap items-center gap-x-8 gap-y-4"
+          >
+            <MagneticButton href={PRIMARY_CTA.href} size="lg">
+              {PRIMARY_CTA.label}
+            </MagneticButton>
+            <a
+              href={HERO.storyHref}
+              className="group relative inline-flex items-center gap-2 py-2 after:absolute after:inset-x-0 after:bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-current after:transition-[scale] after:duration-500 after:ease-out hover:after:scale-x-100"
             >
-              ↓
-            </span>
-          </a>
+              {HERO.storyLabel}
+              <span
+                aria-hidden="true"
+                className="transition-[translate] duration-500 ease-out group-hover:translate-y-1"
+              >
+                ↓
+              </span>
+            </a>
+          </div>
         </div>
       </div>
 
