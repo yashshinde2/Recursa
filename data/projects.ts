@@ -1,3 +1,62 @@
+export type Project = {
+  slug: string
+  name: string
+  category: string
+  image: string
+  imageAlt: string
+  url: string
+  problem: string
+  built: string
+  result: string
+}
+
+export const PROJECTS = [
+  {
+    slug: 'house-of-666',
+    name: 'House of 666',
+    category: 'Website · Restaurant & Café',
+    image: '/work/house-of-666.webp',
+    imageAlt: 'House of 666 Resto & Cafe website homepage with gold palm trees',
+    url: 'https://house-of-666.netlify.app/',
+    problem: 'A new Kolhapur café needed an online presence that matched its royal, coastal feel.',
+    built: 'A branded, animated site with menu, story and directions.',
+    result: 'Live, with a 5.0 Google rating shown on the homepage.',
+  },
+  {
+    slug: 'dhanshri-foods',
+    name: 'Dhanshri Foods',
+    category: 'E-commerce · Food Manufacturing',
+    image: '/work/dhanshri-foods.webp',
+    imageAlt: 'Dhanshri Foods e-commerce homepage with namkeen and chips',
+    url: 'https://dhanashri-foods.netlify.app/',
+    problem: 'A chips and namkeen maker wanted to sell retail and take bulk B2B orders online.',
+    built: 'An online store with product catalogue, cart and a B2B enquiry flow.',
+    result: 'Live store serving both retail buyers and bulk customers.',
+  },
+  {
+    slug: 'murti-maker-pro',
+    name: 'Murti Maker Pro',
+    category: 'Web App · Automation · Silver Jewellery',
+    image: '/work/murti-maker-pro.webp',
+    imageAlt: 'Silver idol catalogue app for Roukhar Brothers with search and filters',
+    url: 'https://murti-maker-pro.lovable.app/',
+    problem: 'A silver idol maker was quoting orders by hand across 99 products.',
+    built: 'A bilingual catalogue and order app with search, filters and silver-weight totals.',
+    result: 'Orders are built and totalled in the app instead of by hand.',
+  },
+  {
+    slug: 'kd-export',
+    name: 'KD Export',
+    category: 'Website · CRM Software · Agri Export',
+    image: '/work/kd-export.webp',
+    imageAlt: 'KD Export banana supplier website with export statistics',
+    url: 'https://kdexport.co.in/',
+    problem: 'A banana exporter and cold-storage company needed a credible web presence and a way to manage farmers and clients.',
+    built: 'A corporate website, plus a custom CRM for their operations.',
+    result: 'Live in production, with 12+ countries and 1500+ farmers shown on the site.',
+  },
+] as const
+
 export type SelectedProject = {
   slug: string
   name: string
