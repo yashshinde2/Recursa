@@ -36,7 +36,7 @@ function PartnerMark({ index }: { index: number }) {
   const common = 'h-8 w-8 shrink-0'
 
   return (
-    <span className="flex items-center gap-3 text-ink/50 grayscale transition duration-500 group-hover:text-signal group-hover:grayscale-0">
+    <div className="flex w-full max-w-[230px] sm:max-w-[260px] items-center gap-3 text-ink/50 grayscale transition duration-500 group-hover:text-signal group-hover:grayscale-0">
       <svg aria-hidden="true" viewBox="0 0 40 40" className={common} fill="none">
         {index % 4 === 0 && (
           <>
@@ -64,8 +64,8 @@ function PartnerMark({ index }: { index: number }) {
           </>
         )}
       </svg>
-      <span className="font-mono text-[10px] tracking-[0.12em] uppercase">{PARTNERS[index]}</span>
-    </span>
+      <span className="truncate font-mono text-[10px] tracking-[0.12em] uppercase">{PARTNERS[index]}</span>
+    </div>
   )
 }
 
