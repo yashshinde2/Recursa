@@ -2,7 +2,8 @@
 
 import { ArrowUp } from 'lucide-react'
 
-import { scrollToTarget, useLenis } from '@/components/smooth-scroll'
+import { useLenis } from '@/components/smooth-scroll'
+import { scrollToSection } from '@/lib/scroll-to'
 import { cn } from '@/lib/utils'
 
 export function BackToTop({ className }: { className?: string }) {
@@ -11,9 +12,9 @@ export function BackToTop({ className }: { className?: string }) {
   return (
     <button
       type="button"
-      onClick={() => scrollToTarget(lenis, 0)}
+      onClick={() => scrollToSection(lenis, 0, { duration: 1.2 })}
       className={cn(
-        'inline-flex items-center gap-2 transition-colors duration-300 hover:text-foreground',
+        'inline-flex items-center gap-2 transition-colors duration-300 hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-signal',
         className,
       )}
     >

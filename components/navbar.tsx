@@ -7,8 +7,9 @@ import type { MouseEvent } from 'react'
 import { Logo } from '@/components/logo'
 import { MagneticButton } from '@/components/magnetic-button'
 import { MobileMenu } from '@/components/mobile-menu'
-import { scrollToTarget, useLenis } from '@/components/smooth-scroll'
+import { useLenis } from '@/components/smooth-scroll'
 import { useHideOnScroll } from '@/hooks/use-hide-on-scroll'
+import { scrollToSection, useActiveSection, useHashScroll } from '@/lib/scroll-to'
 import { NAV_LINKS, PRIMARY_CTA, SITE } from '@/lib/site'
 import { cn } from '@/lib/utils'
 
@@ -16,11 +17,25 @@ export function Navbar() {
   const { hidden, scrolled } = useHideOnScroll()
   const lenis = useLenis()
   const pathname = usePathname()
+  const activeSection = useActiveSection()
+  useHashScroll()
 
   const handleLogoClick = (event: MouseEvent<HTMLAnchorElement>) => {
     if (pathname !== '/') return
     event.preventDefault()
-    scrollToTarget(lenis, 0)
+    window.history.pushState(null, '', '/')
+    scrollToSection(lenis, 0, { duration: 1.2 })
+  }
+
+  const handleNavClick = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href === '/team') return
+
+    if (pathname === '/') {
+      event.preventDefault()
+      const cleanId = href.startsWith('/#') ? href.slice(1) : href
+      window.history.pushState(null, '', cleanId)
+      scrollToSection(lenis, cleanId, { duration: 1.2 })
+    }
   }
 
   return (
@@ -40,23 +55,45 @@ export function Navbar() {
           href="/"
           onClick={handleLogoClick}
           aria-label={`${SITE.name} — home`}
-          className="flex shrink-0"
+          className="flex shrink-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-signal"
         >
           <Logo />
         </Link>
 
         <nav aria-label="Primary" className="hidden lg:block">
           <ul className="flex items-center gap-6">
-            {NAV_LINKS.map((link) => (
-              <li key={link.href}>
-                <a
-                  href={link.href}
-                  className="relative block px-1.5 py-2 font-mono text-xs tracking-[0.14em] uppercase after:absolute after:inset-x-1.5 after:bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-current after:transition-[scale] after:duration-300 after:ease-out hover:after:scale-x-100"
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const isActive =
+                (link.href === '/team' && activeSection === 'team') ||
+                (Boolean(activeSection) && link.href.endsWith(`#${activeSection}`))
+
+              return (
+                <li key={link.href}>
+                  <a
+                    href={link.href}
+                    onClick={(e) => handleNavClick(e, link.href)}
+                    aria-current={isActive ? 'true' : undefined}
+                    className={cn(
+                      'relative flex items-center gap-1.5 px-1.5 py-2 font-mono text-xs tracking-[0.14em] uppercase transition-colors duration-300',
+                      isActive ? 'text-signal' : 'text-foreground hover:text-signal',
+                      'after:absolute after:inset-x-1.5 after:bottom-1 after:h-px after:origin-left after:transition-[scale,background-color] after:duration-300 after:ease-out',
+                      isActive
+                        ? 'after:scale-x-100 after:bg-signal'
+                        : 'after:scale-x-0 after:bg-current hover:after:scale-x-100',
+                      'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-signal',
+                    )}
+                  >
+                    {isActive && (
+                      <span
+                        aria-hidden="true"
+                        className="size-1 rounded-full bg-signal"
+                      />
+                    )}
+                    {link.label}
+                  </a>
+                </li>
+              )
+            })}
           </ul>
         </nav>
 

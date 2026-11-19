@@ -83,6 +83,7 @@ export function WhoWeAre() {
   return (
     <section
       ref={sectionRef}
+      id="who-we-are"
       data-theme="light"
       aria-labelledby="who-we-are-heading"
       className="relative bg-bone text-ink"

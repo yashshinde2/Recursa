@@ -221,6 +221,7 @@ export function Services() {
   return (
     <section
       ref={sectionRef}
+      id="services"
       data-theme="dark"
       aria-labelledby="services-heading"
       className="grain relative"

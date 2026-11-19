@@ -4,7 +4,7 @@ import { SectionLabel } from '@/components/section-label'
 import { NAV_LINKS, PRIMARY_CTA, SITE } from '@/lib/site'
 
 const linkClassName =
-  'inline-block py-1 text-lg transition-colors duration-300 hover:text-signal'
+  'inline-block py-1 text-lg transition-colors duration-300 hover:text-signal focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-signal'
 
 export function Footer() {
   return (

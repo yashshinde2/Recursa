@@ -2,21 +2,27 @@
 
 import { Dialog } from '@base-ui/react/dialog'
 import { ArrowUpRight } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, type MouseEvent } from 'react'
 
 import { Logo } from '@/components/logo'
-import { scrollToTarget, useLenis } from '@/components/smooth-scroll'
+import { useLenis } from '@/components/smooth-scroll'
+import { scrollToSection, useActiveSection } from '@/lib/scroll-to'
 import { NAV_LINKS, PRIMARY_CTA, SITE } from '@/lib/site'
+import { cn } from '@/lib/utils'
 
 const DESKTOP_QUERY = '(min-width: 64rem)'
 
 const toggleClassName =
-  'inline-flex h-10 items-center border border-border px-3.5 font-mono text-xs tracking-[0.14em] uppercase transition-colors duration-300 hover:border-foreground hover:bg-foreground hover:text-background'
+  'inline-flex h-10 items-center border border-border px-3.5 font-mono text-xs tracking-[0.14em] uppercase transition-colors duration-300 hover:border-foreground hover:bg-foreground hover:text-background focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-signal'
 
 export function MobileMenu() {
   const [open, setOpen] = useState(false)
   const pendingTarget = useRef<string | null>(null)
   const lenis = useLenis()
+  const router = useRouter()
+  const pathname = usePathname()
+  const activeSection = useActiveSection()
 
   useEffect(() => {
     const desktop = window.matchMedia(DESKTOP_QUERY)
@@ -43,8 +49,18 @@ export function MobileMenu() {
     pendingTarget.current = null
     if (!target) return
 
-    window.history.pushState(null, '', target)
-    scrollToTarget(lenis, target)
+    if (target === '/team') {
+      router.push('/team')
+      return
+    }
+
+    if (pathname === '/') {
+      const cleanId = target.startsWith('/#') ? target.slice(1) : target
+      window.history.pushState(null, '', cleanId)
+      scrollToSection(lenis, cleanId, { duration: 1.2 })
+    } else {
+      router.push(target.startsWith('#') ? `/${target}` : target)
+    }
   }
 
   const handleLinkClick =
@@ -80,25 +96,39 @@ export function MobileMenu() {
 
             <nav aria-label="Mobile" className="flex-1 px-5 pt-6 md:px-8">
               <ul>
-                {NAV_LINKS.map((link, index) => (
-                  <li key={link.href} className="border-b border-border">
-                    <a
-                      href={link.href}
-                      onClick={handleLinkClick(link.href)}
-                      className="group/link flex items-baseline gap-5 overflow-hidden py-4"
-                    >
-                      <span className="font-mono text-xs tracking-[0.14em] text-muted-foreground tabular-nums">
-                        {String(index + 1).padStart(2, '0')}
-                      </span>
-                      <span
-                        style={{ transitionDelay: `${180 + index * 60}ms` }}
-                        className="block font-serif text-5xl leading-none tracking-tight transition-[translate] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-data-[starting-style]/menu:translate-y-[120%] sm:text-6xl"
+                {NAV_LINKS.map((link, index) => {
+                  const isActive =
+                    (link.href === '/team' && activeSection === 'team') ||
+                    (Boolean(activeSection) && link.href.endsWith(`#${activeSection}`))
+
+                  return (
+                    <li key={link.href} className="border-b border-border">
+                      <a
+                        href={link.href}
+                        onClick={handleLinkClick(link.href)}
+                        aria-current={isActive ? 'true' : undefined}
+                        className={cn(
+                          'group/link flex items-baseline gap-5 overflow-hidden py-4 transition-colors',
+                          isActive ? 'text-signal' : 'text-foreground hover:text-signal',
+                          'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-signal',
+                        )}
                       >
-                        {link.label}
-                      </span>
-                    </a>
-                  </li>
-                ))}
+                        <span className="flex items-center gap-2 font-mono text-xs tracking-[0.14em] text-muted-foreground tabular-nums">
+                          {isActive && (
+                            <span aria-hidden="true" className="size-1.5 rounded-full bg-signal" />
+                          )}
+                          {String(index + 1).padStart(2, '0')}
+                        </span>
+                        <span
+                          style={{ transitionDelay: `${180 + index * 60}ms` }}
+                          className="block font-serif text-5xl leading-none tracking-tight transition-[translate] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-data-[starting-style]/menu:translate-y-[120%] sm:text-6xl"
+                        >
+                          {link.label}
+                        </span>
+                      </a>
+                    </li>
+                  )
+                })}
               </ul>
             </nav>
 
@@ -106,7 +136,7 @@ export function MobileMenu() {
               <a
                 href={PRIMARY_CTA.href}
                 onClick={handleLinkClick(PRIMARY_CTA.href)}
-                className="flex h-14 items-center justify-between rounded-sm bg-signal px-5 font-medium text-ink transition-colors duration-300 hover:bg-foreground"
+                className="flex h-14 items-center justify-between rounded-sm bg-signal px-5 font-medium text-ink transition-colors duration-300 hover:bg-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-signal"
               >
                 {PRIMARY_CTA.label}
                 <ArrowUpRight aria-hidden="true" className="size-5" />

@@ -1,14 +1,18 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import {
   useRef,
   type AnchorHTMLAttributes,
   type ButtonHTMLAttributes,
+  type MouseEvent,
   type ReactNode,
 } from 'react'
 
+import { useLenis } from '@/components/smooth-scroll'
 import { gsap, useGSAP } from '@/lib/gsap'
+import { scrollToSection } from '@/lib/scroll-to'
 import { cn } from '@/lib/utils'
 
 const MAGNETIC_QUERY =
@@ -125,18 +129,36 @@ export function MagneticButton({
     </span>
   )
 
+  const lenis = useLenis()
+  const pathname = usePathname()
+
+  const handleAnchorClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    ;(props as AnchorProps).onClick?.(event)
+    if (event.defaultPrevented) return
+
+    if (props.href) {
+      const isHash = props.href.startsWith('#') || (pathname === '/' && props.href.startsWith('/#'))
+      if (isHash) {
+        event.preventDefault()
+        const target = props.href.startsWith('/#') ? props.href.slice(1) : props.href
+        window.history.pushState(null, '', target)
+        scrollToSection(lenis, target, { duration: 1.2 })
+      }
+    }
+  }
+
   return (
     <span ref={wrapperRef} className={cn('inline-flex', wrapperClassName)}>
       {props.href === undefined ? (
         <button type="button" {...props} className={buttonClassName}>
           {label}
         </button>
-      ) : props.href.startsWith('/') ? (
+      ) : props.href.startsWith('/') && !props.href.startsWith('/#') ? (
         <Link {...props} href={props.href} className={buttonClassName}>
           {label}
         </Link>
       ) : (
-        <a {...props} className={buttonClassName}>
+        <a {...props} href={props.href} onClick={handleAnchorClick} className={buttonClassName}>
           {label}
         </a>
       )}

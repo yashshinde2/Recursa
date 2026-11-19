@@ -143,7 +143,7 @@ export function Contact() {
             <a
               href="https://wa.me/?text=Hi%20Recursa%2C%20I%27d%20like%20to%20talk%20about%20a%20project."
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="border-b border-bone/30 pb-1 transition-colors hover:border-signal hover:text-signal"
             >
               Message us on WhatsApp ↗

@@ -11,26 +11,33 @@ const AUTOPLAY_DURATION = 8
 
 export function SelectedWork() {
   const [activeIndex, setActiveIndex] = useState(0)
+  const [displayedIndex, setDisplayedIndex] = useState(0)
   const [isUserPaused, setIsUserPaused] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
   const [isOnScreen, setIsOnScreen] = useState(false)
   const [isDocumentVisible, setIsDocumentVisible] = useState(true)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  const [isSaveData, setIsSaveData] = useState(false)
+  const [videoErrors, setVideoErrors] = useState<Record<number, boolean>>({})
 
   const sectionRef = useRef<HTMLElement>(null)
   const infoRef = useRef<HTMLDivElement>(null)
   const slideRefs = useRef<(HTMLDivElement | null)[]>([])
+  const mediaInnerRefs = useRef<(HTMLDivElement | null)[]>([])
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([])
   const progressRefs = useRef<(HTMLDivElement | null)[]>([])
-  const progressTweenRef = useRef<gsap.core.Tween | null>(null)
+
+  const progressTweenRef = useRef<gsap.core.Timeline | null>(null)
+  const mediaTweenRef = useRef<gsap.core.Tween | null>(null)
+  const infoTweenRef = useRef<gsap.core.Tween | null>(null)
   const prevIndexRef = useRef(0)
 
   const touchStartX = useRef<number | null>(null)
   const touchStartY = useRef<number | null>(null)
 
-  // Listen for reduced motion preference
+  // Listen for reduced motion preference and connection saveData
   useEffect(() => {
     const mql = window.matchMedia('(prefers-reduced-motion: reduce)')
     setPrefersReducedMotion(mql.matches)
@@ -39,6 +46,14 @@ export function SelectedWork() {
       setPrefersReducedMotion(e.matches)
     }
     mql.addEventListener('change', handleChange)
+
+    if (typeof navigator !== 'undefined' && 'connection' in navigator) {
+      const conn = (navigator as unknown as { connection?: { saveData?: boolean } }).connection
+      if (conn?.saveData) {
+        setIsSaveData(true)
+      }
+    }
+
     return () => mql.removeEventListener('change', handleChange)
   }, [])
 
@@ -51,7 +66,7 @@ export function SelectedWork() {
       ([entry]) => {
         setIsOnScreen(entry.isIntersecting)
       },
-      { threshold: 0.2 },
+      { threshold: 0.15 },
     )
 
     observer.observe(section)
@@ -67,7 +82,7 @@ export function SelectedWork() {
     return () => document.removeEventListener('visibilitychange', handleVisibility)
   }, [])
 
-  // Fade-up entrance on enter (no pin, no scrub)
+  // Fade-up entrance on enter
   useGSAP(
     () => {
       const section = sectionRef.current
@@ -102,76 +117,183 @@ export function SelectedWork() {
     { scope: sectionRef },
   )
 
+  const canAnimate = !prefersReducedMotion && !isSaveData
+
   const shouldPlayTimer =
+    canAnimate &&
     !isUserPaused &&
     isOnScreen &&
     isDocumentVisible &&
     !isHovered &&
-    !isFocused &&
-    !prefersReducedMotion
+    !isFocused
 
-  const shouldPlayVideos = isOnScreen && isDocumentVisible && !prefersReducedMotion
+  const shouldPlayVideos = canAnimate && isOnScreen && isDocumentVisible
 
-  // Handle video playback and crossfade between slides
+  const handleVideoError = useCallback((index: number) => {
+    setVideoErrors((prev) => ({ ...prev, [index]: true }))
+  }, [])
+
+  // Media crossfade, slow initial zoom (1.06 -> 1 over 1.4s), and breathing scale (1 -> 1.03)
   useEffect(() => {
     const prevIndex = prevIndexRef.current
-    const prevSlide = slideRefs.current[prevIndex]
-    const nextSlide = slideRefs.current[activeIndex]
-    const prevVideo = videoRefs.current[prevIndex]
-    const nextVideo = videoRefs.current[activeIndex]
+    const isInitialMount = prevIndex === activeIndex && prevIndexRef.current === 0
 
+    // Handle videos: pause previous
     if (prevIndex !== activeIndex) {
-      if (prefersReducedMotion) {
-        if (prevSlide) gsap.set(prevSlide, { autoAlpha: 0 })
-        if (nextSlide) gsap.set(nextSlide, { autoAlpha: 1 })
-      } else {
-        if (prevSlide) {
-          gsap.to(prevSlide, {
-            autoAlpha: 0,
-            duration: 0.6,
-            ease: 'power3.out',
-          })
-        }
-        if (nextSlide) {
-          gsap.to(nextSlide, {
-            autoAlpha: 1,
-            duration: 0.6,
-            ease: 'power3.out',
-          })
-        }
-      }
-
-      // Animate info panel content change
-      if (infoRef.current && !prefersReducedMotion) {
-        gsap.fromTo(
-          infoRef.current,
-          { autoAlpha: 0.4, y: 6 },
-          { autoAlpha: 1, y: 0, duration: 0.45, ease: 'power2.out' },
-        )
-      }
-
-      if (prevVideo && prevIndex !== activeIndex) {
+      const prevVideo = videoRefs.current[prevIndex]
+      if (prevVideo) {
         prevVideo.pause()
       }
     }
 
-    if (nextVideo) {
+    // Play current active video
+    const currentVideo = videoRefs.current[activeIndex]
+    if (currentVideo && !videoErrors[activeIndex]) {
       if (shouldPlayVideos) {
-        nextVideo.play().catch(() => { })
+        currentVideo.play().catch(() => {})
       } else {
-        nextVideo.pause()
+        currentVideo.pause()
       }
     }
 
-    prevIndexRef.current = activeIndex
-  }, [activeIndex, prefersReducedMotion, shouldPlayVideos])
+    const prevSlide = slideRefs.current[prevIndex]
+    const nextSlide = slideRefs.current[activeIndex]
+    const nextMediaInner = mediaInnerRefs.current[activeIndex]
 
-  // Autoplay progress bar timer
+    if (!canAnimate) {
+      slideRefs.current.forEach((slide, idx) => {
+        if (slide) {
+          gsap.set(slide, {
+            autoAlpha: idx === activeIndex ? 1 : 0,
+            zIndex: idx === activeIndex ? 2 : 1,
+          })
+        }
+      })
+      prevIndexRef.current = activeIndex
+      return
+    }
+
+    // Kill previous media breathing tween
+    if (mediaTweenRef.current) {
+      mediaTweenRef.current.kill()
+      mediaTweenRef.current = null
+    }
+
+    if (prevIndex !== activeIndex && prevSlide && nextSlide && nextMediaInner) {
+      // Add will-change only during the transition
+      gsap.set([prevSlide, nextSlide, nextMediaInner], { willChange: 'opacity, transform' })
+
+      // Crossfade media 0.7s with power3.out
+      gsap.to(prevSlide, {
+        autoAlpha: 0,
+        zIndex: 1,
+        duration: 0.7,
+        ease: 'power3.out',
+        onComplete: () => {
+          gsap.set(prevSlide, { willChange: 'auto' })
+        },
+      })
+
+      gsap.to(nextSlide, {
+        autoAlpha: 1,
+        zIndex: 2,
+        duration: 0.7,
+        ease: 'power3.out',
+      })
+
+      // Incoming media: slow scale from 1.06 to 1 over 1.4s
+      gsap.fromTo(
+        nextMediaInner,
+        { scale: 1.06 },
+        {
+          scale: 1,
+          duration: 1.4,
+          ease: 'power3.out',
+          onComplete: () => {
+            gsap.set([nextSlide, nextMediaInner], { willChange: 'auto' })
+            // Active media gets slow breathing scale 1 to 1.03 over the remaining duration
+            mediaTweenRef.current = gsap.to(nextMediaInner, {
+              scale: 1.03,
+              duration: 6.6,
+              ease: 'sine.inOut',
+            })
+          },
+        },
+      )
+    } else if (isInitialMount && nextMediaInner) {
+      // Initial breathing on mount
+      mediaTweenRef.current = gsap.to(nextMediaInner, {
+        scale: 1.03,
+        duration: 8,
+        ease: 'sine.inOut',
+      })
+    }
+
+    prevIndexRef.current = activeIndex
+  }, [activeIndex, canAnimate, shouldPlayVideos, videoErrors])
+
+  // Pause / resume active video when off-screen or tab is hidden
   useEffect(() => {
+    const currentVideo = videoRefs.current[activeIndex]
+    if (!currentVideo || videoErrors[activeIndex]) return
+
+    if (shouldPlayVideos) {
+      currentVideo.play().catch(() => {})
+    } else {
+      currentVideo.pause()
+    }
+  }, [shouldPlayVideos, activeIndex, videoErrors])
+
+  // Info panel masked slide-up transition
+  useEffect(() => {
+    if (displayedIndex === activeIndex) return
+
+    if (!canAnimate || !infoRef.current) {
+      setDisplayedIndex(activeIndex)
+      return
+    }
+
+    if (infoTweenRef.current) {
+      infoTweenRef.current.kill()
+      infoTweenRef.current = null
+    }
+
+    const items = infoRef.current.querySelectorAll('[data-reveal-item]')
+
+    // Outgoing text fades out quickly first
+    gsap.to(items, {
+      autoAlpha: 0,
+      y: -6,
+      duration: 0.18,
+      ease: 'power2.in',
+      onComplete: () => {
+        setDisplayedIndex(activeIndex)
+        requestAnimationFrame(() => {
+          if (!infoRef.current) return
+          const newItems = infoRef.current.querySelectorAll('[data-reveal-item]')
+          infoTweenRef.current = gsap.fromTo(
+            newItems,
+            { yPercent: 105, autoAlpha: 0 },
+            {
+              yPercent: 0,
+              autoAlpha: 1,
+              duration: 0.55,
+              stagger: 0.08,
+              ease: 'power3.out',
+            },
+          )
+        })
+      },
+    })
+  }, [activeIndex, displayedIndex, canAnimate])
+
+  // Drive auto-advance and the tab progress bar from ONE gsap tween (8 seconds)
+  useEffect(() => {
+    // Reset all progress bars
     progressRefs.current.forEach((bar, idx) => {
       if (bar) {
         gsap.set(bar, {
-          scaleX: idx === activeIndex && prefersReducedMotion ? 1 : 0,
+          scaleX: idx === activeIndex && !canAnimate ? 1 : 0,
         })
       }
     })
@@ -181,11 +303,12 @@ export function SelectedWork() {
       progressTweenRef.current = null
     }
 
-    if (prefersReducedMotion) return
+    if (!canAnimate) return
 
     const activeBar = progressRefs.current[activeIndex]
     if (!activeBar) return
 
+    // ONE GSAP tween (8 seconds per project, onComplete goes to next project)
     const tween = gsap.fromTo(
       activeBar,
       { scaleX: 0 },
@@ -199,6 +322,19 @@ export function SelectedWork() {
       },
     )
 
+    // Preload the NEXT project's video during the last 2 seconds (at 6s mark)
+    tween.call(
+      () => {
+        const nextIndex = (activeIndex + 1) % PROJECTS.length
+        const nextVideo = videoRefs.current[nextIndex]
+        if (nextVideo && !videoErrors[nextIndex]) {
+          nextVideo.preload = 'auto'
+        }
+      },
+      [],
+      6,
+    )
+
     progressTweenRef.current = tween
 
     if (!shouldPlayTimer) {
@@ -208,19 +344,28 @@ export function SelectedWork() {
     return () => {
       tween.kill()
     }
-  }, [activeIndex, prefersReducedMotion]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeIndex, canAnimate]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Pause / resume progress tween based on conditions
   useEffect(() => {
     const tween = progressTweenRef.current
-    if (!tween || prefersReducedMotion) return
+    if (!tween || !canAnimate) return
 
     if (shouldPlayTimer) {
-      if (tween.paused()) tween.play()
+      if (tween.paused()) tween.resume()
     } else {
       if (!tween.paused()) tween.pause()
     }
-  }, [shouldPlayTimer, prefersReducedMotion])
+  }, [shouldPlayTimer, canAnimate])
+
+  // Clean up all tweens on unmount
+  useEffect(() => {
+    return () => {
+      progressTweenRef.current?.kill()
+      mediaTweenRef.current?.kill()
+      infoTweenRef.current?.kill()
+    }
+  }, [])
 
   // Pause / play toggle
   const togglePause = useCallback(() => {
@@ -274,7 +419,7 @@ export function SelectedWork() {
     touchStartY.current = null
   }
 
-  const activeProject = PROJECTS[activeIndex]
+  const displayedProject = PROJECTS[displayedIndex]
 
   return (
     <section
@@ -302,92 +447,135 @@ export function SelectedWork() {
               onTouchEnd={handleTouchEnd}
               className="relative aspect-video max-h-[70svh] w-full overflow-hidden rounded-[2px] border border-ink/15 bg-ink/5"
             >
-              {PROJECTS.map((project, index) => (
-                <div
-                  key={project.slug}
-                  ref={(el) => {
-                    slideRefs.current[index] = el
-                  }}
-                  className="absolute inset-0 h-full w-full"
-                  style={{
-                    opacity: index === 0 ? 1 : 0,
-                    visibility: index === 0 ? 'visible' : 'hidden',
-                  }}
-                >
-                  {Boolean(project.video) ? (
-                    <video
+              {PROJECTS.map((project, index) => {
+                const isInitial = index === 0
+                const hasVideo = Boolean(project.video) && !videoErrors[index] && canAnimate
+
+                return (
+                  <div
+                    key={project.slug}
+                    ref={(el) => {
+                      slideRefs.current[index] = el
+                    }}
+                    className="absolute inset-0 h-full w-full overflow-hidden"
+                    style={{
+                      opacity: isInitial ? 1 : 0,
+                      visibility: isInitial ? 'visible' : 'hidden',
+                      zIndex: isInitial ? 2 : 1,
+                    }}
+                  >
+                    <div
                       ref={(el) => {
-                        videoRefs.current[index] = el
+                        mediaInnerRefs.current[index] = el
                       }}
-                      src={project.video}
-                      poster={project.image}
-                      muted
-                      loop
-                      playsInline
-                      preload="none"
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <Image
-                      src={project.image}
-                      alt={project.imageAlt}
-                      fill
-                      sizes="(min-width: 768px) 66vw, 100vw"
-                      priority={index === 0}
-                      className="object-cover"
-                    />
-                  )}
-                </div>
-              ))}
+                      className="relative h-full w-full origin-center"
+                    >
+                      {/* High-res poster image via next/image */}
+                      <Image
+                        src={project.image}
+                        alt={project.imageAlt}
+                        fill
+                        sizes="(min-width: 768px) 66vw, 100vw"
+                        priority={isInitial}
+                        className="object-cover"
+                      />
+
+                      {/* Video layer if enabled & not errored */}
+                      {hasVideo && (
+                        <video
+                          ref={(el) => {
+                            videoRefs.current[index] = el
+                          }}
+                          src={project.video}
+                          poster={project.image}
+                          muted
+                          loop
+                          playsInline
+                          preload={isInitial ? 'auto' : 'none'}
+                          onError={() => handleVideoError(index)}
+                          className="absolute inset-0 h-full w-full object-cover"
+                        />
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </div>
 
           <div
             ref={infoRef}
-            id={`panel-${activeProject.slug}`}
+            id={`panel-${displayedProject.slug}`}
             role="tabpanel"
-            aria-labelledby={`tab-${activeProject.slug}`}
+            aria-labelledby={`tab-${displayedProject.slug}`}
             className="flex flex-col justify-between gap-6 md:col-span-4"
           >
             <div className="flex flex-col gap-2">
-              <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-                {activeProject.category}
-              </p>
-              <h3 className="font-serif text-3xl leading-[1.05] text-ink md:text-4xl lg:text-5xl">
-                {activeProject.name}
-              </h3>
+              <div className="overflow-hidden">
+                <p
+                  data-reveal-item
+                  className="font-mono text-xs uppercase tracking-wider text-muted-foreground"
+                >
+                  {displayedProject.category}
+                </p>
+              </div>
+              <div className="overflow-hidden">
+                <h3
+                  data-reveal-item
+                  className="font-serif text-3xl leading-[1.05] text-ink md:text-4xl lg:text-5xl"
+                >
+                  {displayedProject.name}
+                </h3>
+              </div>
             </div>
 
             <dl className="space-y-3 border-t border-ink/15 pt-4">
-              <div className="grid grid-cols-[5rem_1fr] gap-3 text-sm md:text-base">
-                <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-                  Problem
-                </dt>
-                <dd className="text-ink/80">{activeProject.problem}</dd>
+              <div className="overflow-hidden">
+                <div
+                  data-reveal-item
+                  className="grid grid-cols-[5rem_1fr] gap-3 text-sm md:text-base"
+                >
+                  <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                    Problem
+                  </dt>
+                  <dd className="text-ink/80">{displayedProject.problem}</dd>
+                </div>
               </div>
-              <div className="grid grid-cols-[5rem_1fr] gap-3 text-sm md:text-base">
-                <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-                  Built
-                </dt>
-                <dd className="text-ink/80">{activeProject.built}</dd>
+              <div className="overflow-hidden">
+                <div
+                  data-reveal-item
+                  className="grid grid-cols-[5rem_1fr] gap-3 text-sm md:text-base"
+                >
+                  <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                    Built
+                  </dt>
+                  <dd className="text-ink/80">{displayedProject.built}</dd>
+                </div>
               </div>
-              <div className="grid grid-cols-[5rem_1fr] gap-3 text-sm md:text-base">
-                <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-                  Result
-                </dt>
-                <dd className="text-ink/80">{activeProject.result}</dd>
+              <div className="overflow-hidden">
+                <div
+                  data-reveal-item
+                  className="grid grid-cols-[5rem_1fr] gap-3 text-sm md:text-base"
+                >
+                  <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                    Result
+                  </dt>
+                  <dd className="text-ink/80">{displayedProject.result}</dd>
+                </div>
               </div>
             </dl>
 
-            <div className="pt-2">
-              <a
-                href={activeProject.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-ink transition-colors hover:underline hover:decoration-signal hover:underline-offset-4"
-              >
-                Visit live site <span aria-hidden="true">↗</span>
-              </a>
+            <div className="overflow-hidden pt-2">
+              <div data-reveal-item>
+                <a
+                  href={displayedProject.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-ink transition-colors hover:underline hover:decoration-signal hover:underline-offset-4 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-signal"
+                >
+                  Visit live site <span aria-hidden="true">↗</span>
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -443,10 +631,11 @@ export function SelectedWork() {
                   </div>
 
                   <span
-                    className={`mt-1 font-serif text-lg leading-tight transition-colors duration-300 md:text-2xl ${isActive
-                      ? 'font-normal text-ink'
-                      : 'text-ink/60 group-hover:text-ink'
-                      }`}
+                    className={`mt-1 font-serif text-lg leading-tight transition-colors duration-300 md:text-2xl ${
+                      isActive
+                        ? 'font-normal text-ink'
+                        : 'text-ink/50 group-hover:text-ink'
+                    }`}
                   >
                     {project.name}
                   </span>

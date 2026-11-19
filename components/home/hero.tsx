@@ -4,7 +4,9 @@ import { useRef } from 'react'
 
 import { HeroSquares } from '@/components/home/hero-squares'
 import { MagneticButton } from '@/components/magnetic-button'
+import { useLenis } from '@/components/smooth-scroll'
 import { gsap, useGSAP } from '@/lib/gsap'
+import { scrollToSection } from '@/lib/scroll-to'
 import { HERO, PRIMARY_CTA } from '@/lib/site'
 
 type HeroProps = {
@@ -14,6 +16,12 @@ type HeroProps = {
 
 export function Hero({ ready }: HeroProps) {
   const sectionRef = useRef<HTMLElement>(null)
+  const lenis = useLenis()
+
+  const handleStoryClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault()
+    scrollToSection(lenis, HERO.storyHref, { duration: 1.2 })
+  }
 
   useGSAP(
     () => {
@@ -119,6 +127,7 @@ export function Hero({ ready }: HeroProps) {
   return (
     <section
       ref={sectionRef}
+      id="home"
       data-theme="dark"
       aria-labelledby="hero-heading"
       className="grain relative flex min-h-[calc(100svh-var(--nav-height))] flex-col overflow-hidden [&_[data-square]]:!border-steel/55"
@@ -175,6 +184,7 @@ export function Hero({ ready }: HeroProps) {
             </MagneticButton>
             <a
               href={HERO.storyHref}
+              onClick={handleStoryClick}
               className="group relative inline-flex items-center gap-2 py-2 after:absolute after:inset-x-0 after:bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-current after:transition-[scale] after:duration-500 after:ease-out hover:after:scale-x-100"
             >
               {HERO.storyLabel}
