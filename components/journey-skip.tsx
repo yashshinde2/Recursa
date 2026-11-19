@@ -17,6 +17,15 @@ export function JourneySkip() {
     const journeyEl = document.getElementById('journey')
     if (!journeyEl) return
 
+    const returnEl = journeyEl.querySelector('[data-journey-return]')
+    if (returnEl) {
+      const returnRect = returnEl.getBoundingClientRect()
+      if (returnRect.top <= window.innerHeight * 0.75) {
+        setInLastRange(true)
+        return
+      }
+    }
+
     const triggers = ScrollTrigger.getAll()
     const journeyTrigger =
       triggers.find((st) => st.trigger === journeyEl) ||

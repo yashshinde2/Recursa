@@ -181,3 +181,6 @@ export const HACKATHONS: Hackathon[] = [
     photos: ['chandigarhsecond1', 'chandigarhsecond2', 'chandigarhsecond3', 'chandigarhsecond4'],
   },
 ]
+
+export const JOURNEY_FRAMES = HACKATHONS
+

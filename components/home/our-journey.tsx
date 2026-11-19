@@ -1,212 +1,97 @@
 'use client'
 
-import { useRef } from 'react'
+import Link from 'next/link'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { JOURNEY_FRAMES } from '@/data/hackathons'
-import { gsap, ScrollTrigger, useGSAP } from '@/lib/gsap'
+import { JourneyCollage } from '@/components/journey-collage'
+import { JourneyLightbox } from '@/components/journey-lightbox'
+import { useLenis } from '@/components/smooth-scroll'
+import { HACKATHONS, type Hackathon } from '@/data/hackathons'
 import { PRIMARY_CTA } from '@/lib/site'
-
-function Tape() {
-  return (
-    <span
-      aria-hidden="true"
-      className="absolute -top-2 left-1/2 z-10 h-5 w-16 -translate-x-1/2 rotate-[-4deg] bg-[#d7c995]/80"
-    />
-  )
-}
-
-function TeamPlaceholder({ label, index }: { label: string; index: number }) {
-  return (
-    <figure
-      className={`relative mx-2 bg-[#f1ece2] p-2 pb-8 shadow-lg ${
-        index % 2 === 0 ? 'rotate-[2.5deg]' : 'rotate-[-3deg]'
-      }`}
-    >
-      <Tape />
-      <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-[#d9d3c8]">
-        <svg aria-hidden="true" viewBox="0 0 240 180" className="absolute inset-0 h-full w-full text-ink/30">
-          <circle cx="77" cy="69" r="20" fill="currentColor" />
-          <circle cx="120" cy="57" r="24" fill="currentColor" />
-          <circle cx="165" cy="70" r="19" fill="currentColor" />
-          <path d="M37 156c2-29 17-44 40-44s39 16 41 44M71 159c2-38 19-58 49-58s47 20 49 58M125 156c2-29 17-44 40-44s39 16 41 44" fill="currentColor" />
-        </svg>
-        <span className="relative bg-bone/85 px-2 py-1 font-mono text-[8px] tracking-[0.12em] text-ink/70 uppercase">
-          photo placeholder
-        </span>
-      </div>
-      <figcaption className="absolute right-2 bottom-1 left-2 truncate text-center font-[cursive] text-[11px] italic text-ink/80">
-        {label}
-      </figcaption>
-    </figure>
-  )
-}
-
-function ScreenshotPlaceholder({ label, index }: { label: string; index: number }) {
-  return (
-    <figure
-      className={`relative mx-2 bg-[#f1ece2] p-2 pb-8 shadow-lg ${
-        index % 2 === 0 ? 'rotate-[-2deg]' : 'rotate-[3deg]'
-      }`}
-    >
-      <Tape />
-      <div className="relative flex aspect-[4/3] flex-col overflow-hidden bg-ink/90">
-        <div className="flex h-7 shrink-0 items-center gap-1.5 border-b border-bone/15 px-3">
-          <span className="size-1.5 rounded-full bg-signal" />
-          <span className="size-1.5 rounded-full bg-bone/30" />
-          <span className="size-1.5 rounded-full bg-bone/30" />
-          <span className="ml-2 h-2 w-1/2 bg-bone/10" />
-        </div>
-        <div className="grid flex-1 grid-cols-[1fr_1.2fr] gap-3 p-4">
-          <div className="flex flex-col gap-2">
-            <span className="h-2 w-3/4 bg-bone/20" />
-            <span className="h-2 w-1/2 bg-bone/10" />
-            <span className="mt-2 h-12 border border-bone/10 bg-signal/10" />
-          </div>
-          <div className="flex flex-col justify-end gap-2">
-            <span className="h-8 border border-bone/10" />
-            <span className="h-6 w-2/3 bg-bone/10" />
-          </div>
-        </div>
-      </div>
-      <figcaption className="absolute right-2 bottom-1 left-2 truncate text-center font-[cursive] text-[11px] italic text-ink/80">
-        {label}
-      </figcaption>
-    </figure>
-  )
-}
+import { cn } from '@/lib/utils'
 
 export function OurJourney() {
+  const [activeDepth, setActiveDepth] = useState(0)
+  const [lightboxState, setLightboxState] = useState<{
+    isOpen: boolean
+    hackathonIndex: number
+    photoIndex: number
+  }>({
+    isOpen: false,
+    hackathonIndex: 0,
+    photoIndex: 0,
+  })
+
+  const lenis = useLenis()
   const sectionRef = useRef<HTMLElement>(null)
+  const framesRef = useRef<(HTMLElement | null)[]>([])
 
-  useGSAP(
-    () => {
-      const section = sectionRef.current
-      if (!section) return
+  // Setup intersection observer for the depth indicator
+  useEffect(() => {
+    const observers: IntersectionObserver[] = []
 
-      const frames = gsap.utils.toArray<HTMLElement>('[data-journey-frame]', section)
-      const depth = section.querySelector<HTMLElement>('[data-journey-depth]')
-      const nodes = gsap.utils.toArray<HTMLElement>('[data-journey-node]', section)
-      const returnCard = section.querySelector<HTMLElement>('[data-journey-return]')
-      const returnTitle = section.querySelector<HTMLElement>('[data-journey-return-title]')
-      const returnCta = section.querySelector<HTMLElement>('[data-journey-return-cta]')
-      const media = gsap.matchMedia()
+    framesRef.current.forEach((frameEl, index) => {
+      if (!frameEl) return
 
-      media.add('(min-width: 768px) and (prefers-reduced-motion: no-preference)', () => {
-        const stage = section.querySelector<HTMLElement>('[data-journey-stage]')
-        if (!stage || !depth || !returnCard || !returnTitle || !returnCta) return
-
-        gsap.set(frames, { position: 'absolute', inset: 0, yPercent: 105, scale: 1, rotation: 0 })
-        gsap.set(frames[0], { yPercent: 0 })
-        gsap.set(returnCard, { position: 'absolute', inset: 0, zIndex: 20, autoAlpha: 0, y: 24 })
-
-        const timeline = gsap.timeline({
-          scrollTrigger: {
-            trigger: stage,
-            start: 'top top',
-            end: `+=${frames.length * 100}%`,
-            scrub: 1,
-            pin: true,
-            anticipatePin: 1,
-            onUpdate: (self) => {
-              const activeIndex = Math.min(
-                frames.length,
-                Math.floor(self.progress * frames.length + 0.001),
-              )
-              depth.textContent =
-                activeIndex >= frames.length
-                  ? 'depth: 00'
-                  : `depth: ${String(activeIndex + 1).padStart(2, '0')}`
-              nodes.forEach((node, index) => {
-                node.dataset.active =
-                  activeIndex < frames.length && index <= activeIndex ? 'true' : 'false'
-              })
-            },
-          },
-        })
-
-        for (let index = 1; index < frames.length; index += 1) {
-          const position = index - 1
-          for (let previous = 0; previous < index; previous += 1) {
-            const distance = index - previous
-            timeline.to(
-              frames[previous],
-              {
-                yPercent: -distance * 1.4,
-                scale: 1 - distance * 0.018,
-                duration: 1,
-                ease: 'none',
-              },
-              position,
-            )
-          }
-          timeline.fromTo(
-            frames[index],
-            { yPercent: 105 },
-            { yPercent: 0, duration: 1, ease: 'none' },
-            position,
-          )
-        }
-
-        const returnStart = frames.length - 1
-        frames.forEach((frame, index) => {
-          timeline.to(
-            frame,
-            {
-              yPercent: -125,
-              xPercent: index % 2 === 0 ? -8 : 8,
-              rotation: index % 2 === 0 ? -3 : 3,
-              scale: 0.88,
-              autoAlpha: 0,
-              duration: 0.18,
-              ease: 'power3.in',
-            },
-            returnStart + (frames.length - index - 1) * 0.1,
-          )
-        })
-        timeline
-          .to(returnCard, { autoAlpha: 1, y: 0, duration: 0.25, ease: 'power3.out' }, returnStart + 0.52)
-          .fromTo(
-            returnTitle,
-            { autoAlpha: 0, y: 14 },
-            { autoAlpha: 1, y: 0, duration: 0.24, ease: 'power3.out' },
-            returnStart + 0.68,
-          )
-          .fromTo(
-            returnCta,
-            { autoAlpha: 0, y: 12 },
-            { autoAlpha: 1, y: 0, duration: 0.22, ease: 'power3.out' },
-            returnStart + 0.82,
-          )
-
-        return () => timeline.scrollTrigger?.kill()
-      })
-
-      media.add('(max-width: 767px) and (prefers-reduced-motion: no-preference)', () => {
-        const triggers = frames.map((frame) => {
-          gsap.set(frame, { autoAlpha: 0, y: 28 })
-          return ScrollTrigger.create({
-            trigger: frame,
-            start: 'top 88%',
-            once: true,
-            onEnter: () => gsap.to(frame, { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power3.out' }),
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setActiveDepth(index)
+            }
           })
-        })
-        return () => triggers.forEach((trigger) => trigger.kill())
-      })
+        },
+        {
+          rootMargin: '-20% 0px -40% 0px',
+          threshold: 0.1,
+        },
+      )
 
-      media.add('(prefers-reduced-motion: reduce)', () => {
-        gsap.set(frames, { clearProps: 'all' })
-        if (returnCard) gsap.set(returnCard, { clearProps: 'all' })
-        nodes.forEach((node) => {
-          node.dataset.active = 'false'
-        })
-        if (depth) depth.textContent = 'depth: 01'
-      })
+      observer.observe(frameEl)
+      observers.push(observer)
+    })
 
-      return () => media.revert()
+    return () => {
+      observers.forEach((obs) => obs.disconnect())
+    }
+  }, [])
+
+  const scrollToFrame = useCallback(
+    (index: number) => {
+      const target = framesRef.current[index]
+      if (!target) return
+
+      const navEl = document.querySelector('header')
+      const navHeight = navEl ? navEl.offsetHeight : 64
+
+      if (lenis) {
+        lenis.scrollTo(target, {
+          duration: 1.2,
+          offset: -(navHeight + index * 14),
+        })
+      } else {
+        const targetTop = target.getBoundingClientRect().top + window.scrollY
+        window.scrollTo({
+          top: targetTop - (navHeight + index * 14),
+          behavior: 'smooth',
+        })
+      }
     },
-    { scope: sectionRef },
+    [lenis],
   )
+
+  const handleOpenPhoto = (hackathonIndex: number, photoIndex: number) => {
+    setLightboxState({
+      isOpen: true,
+      hackathonIndex,
+      photoIndex,
+    })
+  }
+
+  const activeHackathon =
+    lightboxState.isOpen && HACKATHONS[lightboxState.hackathonIndex]
+      ? HACKATHONS[lightboxState.hackathonIndex]
+      : null
 
   return (
     <section
@@ -216,124 +101,271 @@ export function OurJourney() {
       aria-labelledby="journey-heading"
       className="relative bg-teal text-bone"
     >
-      <div className="mx-auto w-full max-w-[1440px] px-5 pt-20 md:px-8 md:pt-28">
+      {/* Film grain effect */}
+      <div
+        aria-hidden="true"
+        className="grain pointer-events-none absolute inset-0 z-10 opacity-30"
+      />
+
+      {/* Intro Header */}
+      <div className="relative z-20 mx-auto w-full max-w-[1440px] px-5 pt-24 pb-14 md:px-8 md:pt-32 md:pb-20">
+        <p className="font-mono text-xs tracking-[0.2em] text-bone/60 uppercase md:text-sm">
+          04 / OUR STORY · THE CALL STACK
+        </p>
+
         <h2
           id="journey-heading"
-          className="font-mono text-xs tracking-[0.18em] text-bone/65 uppercase md:text-sm"
+          className="mt-6 font-serif text-[clamp(2.2rem,5vw,4.5rem)] font-normal leading-[1.08] tracking-tight text-bone max-w-4xl"
         >
-          06 / OUR JOURNEY
+          Five hackathons we entered.{' '}
+          <span className="relative inline-block font-serif italic text-bone">
+            One we hosted.
+            <span
+              className="absolute bottom-1.5 left-0 h-[2.5px] w-full bg-signal"
+              aria-hidden="true"
+            />
+          </span>
         </h2>
+
+        <p className="mt-4 font-serif text-lg italic text-bone/75 md:text-xl max-w-2xl">
+          Every one taught us something. Every build used it.
+        </p>
       </div>
 
-      <div
-        data-journey-stage
-        className="relative mx-auto w-full max-w-[1440px] px-5 pb-20 md:h-[100svh] md:min-h-[680px] md:px-8 md:pb-0"
-      >
-        <div className="pointer-events-none absolute top-8 left-5 z-30 hidden h-[calc(100%-4rem)] w-36 flex-col md:flex md:left-8">
-          <span
-            data-journey-depth
-            className="font-mono text-xs tracking-[0.12em] text-bone/80"
-          >
-            depth: 01
-          </span>
-          <div className="relative mt-6 flex flex-1 flex-col justify-between pb-8">
-            <span className="absolute top-1 bottom-1 left-[3px] w-px bg-bone/25" />
-            {JOURNEY_FRAMES.map((frame, index) => (
-              <span
-                key={frame.name}
-                data-journey-node
-                data-active={index === 0 ? 'true' : 'false'}
-                className="relative flex items-center gap-3 font-mono text-[10px] tracking-[0.1em] text-bone/45 transition-colors duration-300 data-[active=true]:text-bone"
-              >
-                <span className="size-[7px] rounded-full border border-current bg-teal" />
-                {String(index + 1).padStart(2, '0')}
-              </span>
-            ))}
+      {/* Main Stack Container */}
+      <div className="relative z-20 mx-auto w-full max-w-[1440px] px-5 pb-24 md:px-8 md:pb-32">
+        <div className="relative lg:grid lg:grid-cols-[140px_1fr] lg:gap-10">
+          {/* Desktop Left Rail: Call stack depth */}
+          <aside className="pointer-events-none sticky top-28 z-40 hidden h-fit flex-col lg:flex">
+            <span className="font-mono text-xs tracking-[0.14em] text-bone/80">
+              depth: {String(activeDepth + 1).padStart(2, '0')}
+            </span>
+
+            <nav
+              aria-label="Journey frames"
+              className="pointer-events-auto relative mt-6 flex flex-col gap-5 border-l border-bone/20 pl-4 py-1"
+            >
+              {HACKATHONS.map((h, i) => {
+                const isActive = activeDepth === i
+                return (
+                  <button
+                    key={h.slug}
+                    type="button"
+                    onClick={() => scrollToFrame(i)}
+                    className={cn(
+                      'group flex items-center gap-3 text-left font-mono text-xs tracking-wider transition-colors duration-200 cursor-pointer',
+                      isActive ? 'text-signal font-medium' : 'text-bone/50 hover:text-bone/90',
+                    )}
+                    aria-label={`Jump to frame ${i + 1}: ${h.shortName}`}
+                  >
+                    <span
+                      className={cn(
+                        'size-2 rounded-full border transition-all duration-200',
+                        isActive
+                          ? 'border-signal bg-signal scale-125'
+                          : 'border-bone/40 bg-teal group-hover:border-bone/80',
+                      )}
+                    />
+                    <span>{String(i + 1).padStart(2, '0')}</span>
+                    <span className="hidden xl:inline text-[10px] text-bone/40 group-hover:text-bone/70 truncate max-w-[100px]">
+                      {h.shortName}
+                    </span>
+                  </button>
+                )
+              })}
+            </nav>
+          </aside>
+
+          {/* Frames Stack */}
+          <div className="flex flex-col gap-10 md:gap-14 lg:gap-20">
+            {HACKATHONS.map((hackathon, index) => {
+              const depthNumber = String(index + 1).padStart(2, '0')
+
+              return (
+                <article
+                  key={hackathon.slug}
+                  id={`journey-${hackathon.slug}`}
+                  ref={(el) => {
+                    framesRef.current[index] = el
+                  }}
+                  style={{
+                    top: `calc(var(--nav-height, 64px) + ${index * 14}px)`,
+                    zIndex: index + 1,
+                  }}
+                  className={cn(
+                    'group relative rounded-[2px] border border-bone/15 bg-[#0f2d30] p-6 sm:p-8 md:p-10 lg:p-12 shadow-[0_24px_70px_rgba(0,0,0,0.2)]',
+                    'lg:sticky',
+                  )}
+                  aria-labelledby={`journey-${hackathon.slug}-title`}
+                >
+                  {/* Frame Header strip */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-bone/10 pb-4 mb-6">
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-xs font-semibold tracking-[0.16em] text-bone/85 uppercase">
+                        frame_{depthNumber} · {hackathon.shortName}
+                      </span>
+                      {hackathon.badge.text && (
+                        <span
+                          className={cn(
+                            'rounded-[2px] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider',
+                            hackathon.badge.tone === 'winner' &&
+                              'bg-signal text-ink font-semibold',
+                            hackathon.badge.tone === 'organizer' &&
+                              'border border-signal text-signal font-semibold',
+                            hackathon.badge.tone === 'first' &&
+                              'bg-bone/15 text-bone font-medium',
+                            hackathon.badge.tone === 'selected' &&
+                              'border border-bone/30 text-bone/80',
+                          )}
+                        >
+                          {hackathon.badge.text}
+                        </span>
+                      )}
+                    </div>
+                    <span className="font-mono text-xs tracking-wider text-bone/50">
+                      {hackathon.dateLabel} · {hackathon.city}
+                    </span>
+                  </div>
+
+                  {/* Frame Body: Content + Collage */}
+                  <div className="grid gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-10 items-start">
+                    {/* Left Column: Narrative */}
+                    <div className="flex flex-col">
+                      <p className="font-mono text-xs uppercase tracking-wider text-bone/50">
+                        {hackathon.venue}
+                        {hackathon.duration ? ` · ${hackathon.duration}` : ''}
+                        {hackathon.teamLabel ? ` · ${hackathon.teamLabel}` : ''}
+                      </p>
+
+                      <h3
+                        id={`journey-${hackathon.slug}-title`}
+                        className="mt-2 font-serif text-2xl sm:text-3xl lg:text-4xl leading-tight text-bone"
+                      >
+                        {hackathon.title}
+                      </h3>
+
+                      <p className="mt-3 font-serif italic text-bone/90 text-base sm:text-lg leading-snug">
+                        {hackathon.summary}
+                      </p>
+
+                      <p className="mt-4 font-sans text-sm sm:text-base leading-relaxed text-bone/75">
+                        {hackathon.story}
+                      </p>
+
+                      {/* Fact chips */}
+                      {hackathon.facts && hackathon.facts.length > 0 && (
+                        <div className="mt-5 flex flex-wrap gap-2">
+                          {hackathon.facts.map((fact) => (
+                            <span
+                              key={fact}
+                              className="rounded-[2px] bg-bone/10 px-2.5 py-1 font-mono text-[11px] tracking-wide text-bone/75"
+                            >
+                              {fact}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* What we learned callout */}
+                      <div className="mt-6 border-l-2 border-signal pl-4 py-0.5">
+                        <span className="block font-mono text-[10px] tracking-[0.14em] uppercase text-bone/50">
+                          What we learned
+                        </span>
+                        <p className="mt-1 font-serif text-base sm:text-lg italic text-bone leading-snug">
+                          {hackathon.learned}
+                        </p>
+                      </div>
+
+                      {/* Links (GitHub, etc.) */}
+                      {hackathon.links && hackathon.links.length > 0 && (
+                        <div className="mt-6 flex flex-wrap gap-3">
+                          {hackathon.links.map((link) => (
+                            <a
+                              key={link.href}
+                              href={link.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex min-h-[44px] items-center gap-2 rounded-[2px] border border-bone/25 px-4 py-2 font-mono text-xs uppercase tracking-wider text-bone transition-colors duration-200 hover:border-signal hover:text-signal focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-signal"
+                            >
+                              <span>{link.label}</span>
+                              <span aria-hidden="true">↗</span>
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Right Column: Scrapbook Collage */}
+                    <div className="relative w-full">
+                      <JourneyCollage
+                        hackathon={hackathon}
+                        frameIndex={index}
+                        onPhotoClick={(photoIdx) => handleOpenPhoto(index, photoIdx)}
+                      />
+                    </div>
+                  </div>
+                </article>
+              )
+            })}
           </div>
         </div>
 
-        {JOURNEY_FRAMES.map((frame, index) => (
-          <article
-            key={frame.name}
-            data-journey-frame
-            className="relative mb-8 flex min-h-[78svh] flex-col justify-center border border-bone/15 bg-teal px-5 py-8 shadow-[0_24px_70px_rgba(0,0,0,0.12)] last:mb-0 md:inset-0 md:mb-0 md:min-h-0 md:px-16 md:py-14 md:pl-52"
-          >
-            <div className="mb-8 flex items-center justify-between gap-4 md:mb-10">
-              <p className="font-mono text-xs tracking-[0.12em] text-bone/80 uppercase">
-                frame_{String(index + 1).padStart(2, '0')} · {frame.name}
-              </p>
-              <span className="shrink-0 font-mono text-[10px] tracking-[0.12em] text-bone/50">
-                {frame.date}
-              </span>
-            </div>
-
-            <div className="grid gap-8 md:grid-cols-[minmax(0,1.1fr)_minmax(18rem,0.9fr)] md:gap-12">
-              <div>
-                <p className="mb-6 font-mono text-[10px] tracking-[0.14em] text-bone/55 uppercase">
-                  {frame.location}
-                </p>
-                <dl className="space-y-5">
-                  <div>
-                    <dt className="font-mono text-[10px] tracking-[0.12em] text-bone/50 uppercase">
-                      Problem
-                    </dt>
-                    <dd className="mt-1 max-w-2xl text-lg leading-snug text-bone/90 md:text-2xl">
-                      {frame.problem}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="font-mono text-[10px] tracking-[0.12em] text-bone/50 uppercase">
-                      Result
-                    </dt>
-                    <dd className="mt-1 max-w-2xl text-lg leading-snug text-bone/90 md:text-2xl">
-                      {frame.result}
-                    </dd>
-                  </div>
-                </dl>
-                <aside className="mt-6 w-fit max-w-[230px] rotate-[-2deg] bg-[#e8d99a] px-4 py-3 text-ink shadow-lg md:ml-8">
-                  <p className="font-mono text-[9px] tracking-[0.14em] uppercase">keep in mind</p>
-                  <p className="mt-2 font-[cursive] text-lg italic leading-tight">
-                    {frame.learned}
-                  </p>
-                  <span className="mt-2 block text-right font-[cursive] text-xs italic">
-                    — field note {String(index + 1).padStart(2, '0')}
-                  </span>
-                </aside>
-                <p className="mt-6 border-l border-signal pl-3 font-serif text-2xl italic leading-snug md:text-3xl">
-                  What we learned: {frame.learned}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 self-center md:gap-4">
-                <TeamPlaceholder label={frame.teamPhotoPlaceholder} index={index} />
-                <ScreenshotPlaceholder label={frame.screenshotPlaceholder} index={index} />
-              </div>
-            </div>
-          </article>
-        ))}
+        {/* Finale: Return block */}
         <div
           data-journey-return
-          className="relative z-20 flex min-h-[78svh] flex-col items-center justify-center border border-bone/15 bg-teal px-5 py-12 text-center md:min-h-0 md:px-16"
+          className="relative z-30 mx-auto mt-20 max-w-3xl rounded-[2px] border border-bone/15 bg-[#0a2022] p-8 sm:p-12 md:p-16 text-center shadow-2xl"
         >
-          <p
-            data-journey-return-title
-            className="font-mono text-sm tracking-[0.14em] text-bone/75 md:text-base"
+          {/* Call stack unwind visualization */}
+          <div
+            aria-hidden="true"
+            className="mx-auto flex w-fit flex-col items-start gap-1 font-mono text-xs text-bone/40 select-none pb-8"
           >
-            return Recursa;
-          </p>
-          <h3 className="mt-6 font-serif text-[clamp(3.2rem,8vw,8rem)] leading-[0.9] tracking-tight">
+            <span className="opacity-40">return frame_06;</span>
+            <span className="opacity-50">return frame_05;</span>
+            <span className="opacity-60">return frame_04;</span>
+            <span className="opacity-70">return frame_03;</span>
+            <span className="opacity-80">return frame_02;</span>
+            <span className="opacity-90">return frame_01;</span>
+            <span className="text-signal font-semibold pt-1">return Recursa;</span>
+          </div>
+
+          <h3 className="font-serif text-[clamp(2.5rem,7vw,5.5rem)] font-normal leading-[0.95] tracking-tight text-bone">
             Recursa, today.
           </h3>
-          <a
-            data-journey-return-cta
-            href={PRIMARY_CTA.href}
-            className="mt-10 inline-flex items-center gap-3 bg-signal px-6 py-4 font-mono text-xs tracking-[0.14em] text-ink uppercase transition-colors duration-300 hover:bg-bone focus-visible:bg-bone"
-          >
-            {PRIMARY_CTA.label}
-            <span aria-hidden="true">↗</span>
-          </a>
+
+          <p className="mx-auto mt-5 max-w-xl font-serif text-base sm:text-lg italic text-bone/75">
+            Born from six intense sprints, 2,000 km journeys, and 40-hour hackathons. We build
+            production software with the same speed, craftsmanship, and endurance.
+          </p>
+
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+            <a
+              href={PRIMARY_CTA.href}
+              className="inline-flex min-h-[48px] items-center gap-3 rounded-[2px] bg-signal px-6 py-3 font-mono text-xs uppercase tracking-[0.14em] text-ink font-semibold transition-colors duration-200 hover:bg-bone focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-signal"
+            >
+              <span>{PRIMARY_CTA.label}</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+
+            <Link
+              href="/team"
+              className="inline-flex min-h-[48px] items-center gap-2 rounded-[2px] border border-bone/25 px-6 py-3 font-mono text-xs uppercase tracking-[0.14em] text-bone transition-colors duration-200 hover:border-signal hover:text-signal focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-signal"
+            >
+              <span>Meet the team</span>
+              <span aria-hidden="true">→</span>
+            </Link>
+          </div>
         </div>
       </div>
+
+      {/* Lightbox Modal */}
+      <JourneyLightbox
+        hackathon={activeHackathon}
+        photoIndex={lightboxState.photoIndex}
+        isOpen={lightboxState.isOpen}
+        onClose={() => setLightboxState((prev) => ({ ...prev, isOpen: false }))}
+        onNavigate={(newIdx) => setLightboxState((prev) => ({ ...prev, photoIndex: newIdx }))}
+      />
     </section>
   )
 }
