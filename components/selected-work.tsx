@@ -308,22 +308,26 @@ export function SelectedWork() {
     const activeBar = progressRefs.current[activeIndex]
     if (!activeBar) return
 
-    // ONE GSAP tween (8 seconds per project, onComplete goes to next project)
-    const tween = gsap.fromTo(
+    // ONE GSAP timeline driving the 8-second progress line and advance onComplete
+    const tl = gsap.timeline({
+      onComplete: () => {
+        setActiveIndex((prev) => (prev + 1) % PROJECTS.length)
+      },
+    })
+
+    tl.fromTo(
       activeBar,
       { scaleX: 0 },
       {
         scaleX: 1,
         duration: AUTOPLAY_DURATION,
         ease: 'none',
-        onComplete: () => {
-          setActiveIndex((prev) => (prev + 1) % PROJECTS.length)
-        },
       },
+      0,
     )
 
     // Preload the NEXT project's video during the last 2 seconds (at 6s mark)
-    tween.call(
+    tl.call(
       () => {
         const nextIndex = (activeIndex + 1) % PROJECTS.length
         const nextVideo = videoRefs.current[nextIndex]
@@ -335,14 +339,14 @@ export function SelectedWork() {
       6,
     )
 
-    progressTweenRef.current = tween
+    progressTweenRef.current = tl
 
     if (!shouldPlayTimer) {
-      tween.pause()
+      tl.pause()
     }
 
     return () => {
-      tween.kill()
+      tl.kill()
     }
   }, [activeIndex, canAnimate]) // eslint-disable-line react-hooks/exhaustive-deps
 
