@@ -4,7 +4,7 @@ import { OurJourney } from '@/components/home/our-journey'
 import { Partners } from '@/components/home/partners'
 import { SelectedWork } from '@/components/selected-work'
 import { Services } from '@/components/home/services'
-import { Team } from '@/components/home/team'
+import { TeamTeaser } from '@/components/team-teaser'
 import { WhoWeAre } from '@/components/home/who-we-are'
 
 export default function Page() {
@@ -16,7 +16,7 @@ export default function Page() {
       <Services />
       <Partners />
       <OurJourney />
-      <Team />
+      <TeamTeaser />
       <Contact />
     </main>
   )
