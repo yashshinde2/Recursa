@@ -39,7 +39,7 @@ export function WhoWeAre() {
             scrollTrigger: {
               trigger: '[data-manifesto-pin]',
               start: 'top top',
-              end: '+=180%',
+              end: '+=170%',
               scrub: 1,
               pin: true,
               anticipatePin: 1,
