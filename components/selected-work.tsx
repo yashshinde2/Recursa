@@ -7,8 +7,6 @@ import { SectionLabel } from '@/components/section-label'
 import { PROJECTS } from '@/data/projects'
 import { gsap, useGSAP } from '@/lib/gsap'
 
-const AUTOPLAY_DURATION = 8
-
 export function SelectedWork() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [displayedIndex, setDisplayedIndex] = useState(0)
@@ -37,6 +35,9 @@ export function SelectedWork() {
   const touchStartX = useRef<number | null>(null)
   const touchStartY = useRef<number | null>(null)
 
+  // Autoplay duration: 10s for reduced motion, 8s normal
+  const autoplayDuration = prefersReducedMotion ? 10 : 8
+
   // Listen for reduced motion preference and connection saveData
   useEffect(() => {
     const mql = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -57,7 +58,7 @@ export function SelectedWork() {
     return () => mql.removeEventListener('change', handleChange)
   }, [])
 
-  // Section visibility via IntersectionObserver
+  // Section visibility via IntersectionObserver (threshold: 0.25, no restrictive rootMargin)
   useEffect(() => {
     const section = sectionRef.current
     if (!section) return
@@ -66,7 +67,7 @@ export function SelectedWork() {
       ([entry]) => {
         setIsOnScreen(entry.isIntersecting)
       },
-      { threshold: 0.15 },
+      { threshold: 0.25 },
     )
 
     observer.observe(section)
@@ -117,23 +118,20 @@ export function SelectedWork() {
     { scope: sectionRef },
   )
 
-  const canAnimate = !prefersReducedMotion && !isSaveData
-
   const shouldPlayTimer =
-    canAnimate &&
     !isUserPaused &&
     isOnScreen &&
     isDocumentVisible &&
     !isHovered &&
     !isFocused
 
-  const shouldPlayVideos = canAnimate && isOnScreen && isDocumentVisible
+  const shouldPlayVideos = !isSaveData && isOnScreen && isDocumentVisible
 
   const handleVideoError = useCallback((index: number) => {
     setVideoErrors((prev) => ({ ...prev, [index]: true }))
   }, [])
 
-  // Media crossfade, slow initial zoom (1.06 -> 1 over 1.4s), and breathing scale (1 -> 1.03)
+  // Media crossfade and animation
   useEffect(() => {
     const prevIndex = prevIndexRef.current
     const isInitialMount = prevIndex === activeIndex && prevIndexRef.current === 0
@@ -160,12 +158,20 @@ export function SelectedWork() {
     const nextSlide = slideRefs.current[activeIndex]
     const nextMediaInner = mediaInnerRefs.current[activeIndex]
 
-    if (!canAnimate) {
+    // Kill previous media breathing tween
+    if (mediaTweenRef.current) {
+      mediaTweenRef.current.kill()
+      mediaTweenRef.current = null
+    }
+
+    if (prefersReducedMotion) {
       slideRefs.current.forEach((slide, idx) => {
         if (slide) {
-          gsap.set(slide, {
+          gsap.to(slide, {
             autoAlpha: idx === activeIndex ? 1 : 0,
             zIndex: idx === activeIndex ? 2 : 1,
+            duration: 0.5,
+            ease: 'power2.out',
           })
         }
       })
@@ -173,14 +179,7 @@ export function SelectedWork() {
       return
     }
 
-    // Kill previous media breathing tween
-    if (mediaTweenRef.current) {
-      mediaTweenRef.current.kill()
-      mediaTweenRef.current = null
-    }
-
     if (prevIndex !== activeIndex && prevSlide && nextSlide && nextMediaInner) {
-      // Add will-change only during the transition
       gsap.set([prevSlide, nextSlide, nextMediaInner], { willChange: 'opacity, transform' })
 
       // Crossfade media 0.7s with power3.out
@@ -214,23 +213,22 @@ export function SelectedWork() {
             // Active media gets slow breathing scale 1 to 1.03 over the remaining duration
             mediaTweenRef.current = gsap.to(nextMediaInner, {
               scale: 1.03,
-              duration: 6.6,
+              duration: autoplayDuration - 1.4,
               ease: 'sine.inOut',
             })
           },
         },
       )
     } else if (isInitialMount && nextMediaInner) {
-      // Initial breathing on mount
       mediaTweenRef.current = gsap.to(nextMediaInner, {
         scale: 1.03,
-        duration: 8,
+        duration: autoplayDuration,
         ease: 'sine.inOut',
       })
     }
 
     prevIndexRef.current = activeIndex
-  }, [activeIndex, canAnimate, shouldPlayVideos, videoErrors])
+  }, [activeIndex, prefersReducedMotion, shouldPlayVideos, videoErrors, autoplayDuration])
 
   // Pause / resume active video when off-screen or tab is hidden
   useEffect(() => {
@@ -248,7 +246,7 @@ export function SelectedWork() {
   useEffect(() => {
     if (displayedIndex === activeIndex) return
 
-    if (!canAnimate || !infoRef.current) {
+    if (prefersReducedMotion || !infoRef.current) {
       setDisplayedIndex(activeIndex)
       return
     }
@@ -285,15 +283,15 @@ export function SelectedWork() {
         })
       },
     })
-  }, [activeIndex, displayedIndex, canAnimate])
+  }, [activeIndex, displayedIndex, prefersReducedMotion])
 
-  // Drive auto-advance and the tab progress bar from ONE gsap tween (8 seconds)
+  // Drive auto-advance and the tab progress bar from ONE gsap tween (8s normal, 10s reduced motion)
   useEffect(() => {
     // Reset all progress bars
     progressRefs.current.forEach((bar, idx) => {
       if (bar) {
         gsap.set(bar, {
-          scaleX: idx === activeIndex && !canAnimate ? 1 : 0,
+          scaleX: 0,
         })
       }
     })
@@ -303,12 +301,10 @@ export function SelectedWork() {
       progressTweenRef.current = null
     }
 
-    if (!canAnimate) return
-
     const activeBar = progressRefs.current[activeIndex]
     if (!activeBar) return
 
-    // ONE GSAP timeline driving the 8-second progress line and advance onComplete
+    // ONE GSAP timeline driving the progress line and advance onComplete
     const tl = gsap.timeline({
       onComplete: () => {
         setActiveIndex((prev) => (prev + 1) % PROJECTS.length)
@@ -320,15 +316,16 @@ export function SelectedWork() {
       { scaleX: 0 },
       {
         scaleX: 1,
-        duration: AUTOPLAY_DURATION,
+        duration: autoplayDuration,
         ease: 'none',
       },
       0,
     )
 
-    // Preload the NEXT project's video during the last 2 seconds (at 6s mark)
+    // Preload the NEXT project's video during the last 2 seconds
     tl.call(
       () => {
+        if (isSaveData) return
         const nextIndex = (activeIndex + 1) % PROJECTS.length
         const nextVideo = videoRefs.current[nextIndex]
         if (nextVideo && !videoErrors[nextIndex]) {
@@ -336,7 +333,7 @@ export function SelectedWork() {
         }
       },
       [],
-      6,
+      Math.max(0, autoplayDuration - 2),
     )
 
     progressTweenRef.current = tl
@@ -348,19 +345,19 @@ export function SelectedWork() {
     return () => {
       tl.kill()
     }
-  }, [activeIndex, canAnimate]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeIndex, autoplayDuration, isSaveData, videoErrors]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Pause / resume progress tween based on conditions
+  // Pause / resume progress tween based on conditions (without recreating tween)
   useEffect(() => {
     const tween = progressTweenRef.current
-    if (!tween || !canAnimate) return
+    if (!tween) return
 
     if (shouldPlayTimer) {
       if (tween.paused()) tween.resume()
     } else {
       if (!tween.paused()) tween.pause()
     }
-  }, [shouldPlayTimer, canAnimate])
+  }, [shouldPlayTimer])
 
   // Clean up all tweens on unmount
   useEffect(() => {
@@ -371,7 +368,7 @@ export function SelectedWork() {
     }
   }, [])
 
-  // Pause / play toggle
+  // Explicit Pause / play toggle
   const togglePause = useCallback(() => {
     setIsUserPaused((prev) => !prev)
   }, [])
@@ -430,10 +427,8 @@ export function SelectedWork() {
       id="work"
       ref={sectionRef}
       data-theme="light"
-      onPointerEnter={() => setIsHovered(true)}
-      onPointerLeave={() => setIsHovered(false)}
-      onFocus={() => setIsFocused(true)}
-      onBlur={(e) => {
+      onFocusCapture={() => setIsFocused(true)}
+      onBlurCapture={(e) => {
         if (!sectionRef.current?.contains(e.relatedTarget as Node)) {
           setIsFocused(false)
         }
@@ -453,7 +448,8 @@ export function SelectedWork() {
             >
               {PROJECTS.map((project, index) => {
                 const isInitial = index === 0
-                const hasVideo = Boolean(project.video) && !videoErrors[index] && canAnimate
+                const hasVideo =
+                  Boolean(project.video) && !videoErrors[index] && !isSaveData
 
                 return (
                   <div
@@ -512,6 +508,8 @@ export function SelectedWork() {
             id={`panel-${displayedProject.slug}`}
             role="tabpanel"
             aria-labelledby={`tab-${displayedProject.slug}`}
+            onPointerEnter={() => setIsHovered(true)}
+            onPointerLeave={() => setIsHovered(false)}
             className="flex flex-col justify-between gap-6 md:col-span-4"
           >
             <div className="flex flex-col gap-2">
@@ -526,7 +524,7 @@ export function SelectedWork() {
               <div className="overflow-hidden">
                 <h3
                   data-reveal-item
-                  className="font-serif text-3xl leading-[1.05] text-ink md:text-4xl lg:text-5xl"
+                  className="font-serif text-3xl leading-[1.05] text-ink md:text-4xl lg:text-5xl text-balance"
                 >
                   {displayedProject.name}
                 </h3>
@@ -585,7 +583,11 @@ export function SelectedWork() {
         </div>
 
         {/* Tab row below stage + Pause / Play toggle */}
-        <div className="mt-10 md:mt-14">
+        <div
+          onPointerEnter={() => setIsHovered(true)}
+          onPointerLeave={() => setIsHovered(false)}
+          className="mt-10 md:mt-14"
+        >
           <div className="flex items-center justify-between border-b border-ink/10 pb-3">
             <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
               Projects / 0{PROJECTS.length}

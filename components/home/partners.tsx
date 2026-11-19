@@ -1,74 +1,11 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import Image from 'next/image'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { PARTNERS } from '@/data/partners'
+import { TESTIMONIALS } from '@/data/testimonials'
 import { gsap, useGSAP } from '@/lib/gsap'
-
-const PARTNERS = [
-  'PARTNER 01',
-  'PARTNER 02',
-  'PARTNER 03',
-  'PARTNER 04',
-  'PARTNER 05',
-  'PARTNER 06',
-  'PARTNER 07',
-  'PARTNER 08',
-]
-
-const TESTIMONIALS = [
-  {
-    quote: 'They made the complicated feel clear, and gave our team the confidence to move.',
-    name: 'A. Placeholder',
-    role: 'Founder · Northstar',
-  },
-  {
-    quote: 'A thoughtful partner from the first sketch to the moment we shipped.',
-    name: 'M. Placeholder',
-    role: 'Product Lead · Forma',
-  },
-  {
-    quote: 'They listened closely, built with care, and kept asking how it could be better.',
-    name: 'R. Placeholder',
-    role: 'Co-founder · Fieldnote',
-  },
-]
-
-function PartnerMark({ index }: { index: number }) {
-  const common = 'h-8 w-8 shrink-0'
-
-  return (
-    <span className="flex items-center gap-3 text-ink/50 grayscale transition duration-500 group-hover:text-signal group-hover:grayscale-0">
-      <svg aria-hidden="true" viewBox="0 0 40 40" className={common} fill="none">
-        {index % 4 === 0 && (
-          <>
-            <path d="M20 3 37 20 20 37 3 20Z" stroke="currentColor" strokeWidth="2" />
-            <path d="M20 11 29 20 20 29 11 20Z" fill="currentColor" />
-          </>
-        )}
-        {index % 4 === 1 && (
-          <>
-            <circle cx="20" cy="20" r="16" stroke="currentColor" strokeWidth="2" />
-            <path d="M20 4v32M4 20h32" stroke="currentColor" strokeWidth="2" />
-            <circle cx="20" cy="20" r="5" fill="currentColor" />
-          </>
-        )}
-        {index % 4 === 2 && (
-          <>
-            <path d="M6 31 16 9l8 14 5-9 5 17H6Z" fill="currentColor" />
-            <path d="M11 31h23" stroke="currentColor" strokeWidth="2" />
-          </>
-        )}
-        {index % 4 === 3 && (
-          <>
-            <rect x="5" y="5" width="30" height="30" rx="15" stroke="currentColor" strokeWidth="2" />
-            <path d="M13 25V15l7 6 7-6v10" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-          </>
-        )}
-      </svg>
-      <span className="font-mono text-[10px] tracking-[0.12em] uppercase">{PARTNERS[index]}</span>
-    </span>
-  )
-}
 
 export function Partners() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -77,6 +14,12 @@ export function Partners() {
   const dragDistance = useRef(0)
   const activeIndexRef = useRef(0)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
+
+  const validTestimonials = TESTIMONIALS.filter(
+    (t) => t.quote && !t.quote.includes('TODO') && t.name && !t.name.includes('TODO'),
+  )
+  const hasValidTestimonials = validTestimonials.length > 0
 
   useGSAP(
     () => {
@@ -85,17 +28,46 @@ export function Partners() {
     { scope: sectionRef },
   )
 
-  const goTo = (index: number) => {
-    const next = Math.max(0, Math.min(TESTIMONIALS.length - 1, index))
-    activeIndexRef.current = next
-    setActiveIndex(next)
-    if (trackRef.current) {
-      gsap.to(trackRef.current, {
-        xPercent: -next * 100,
-        x: 0,
-        duration: 0.7,
-        ease: 'power3.out',
-      })
+  const goTo = useCallback(
+    (index: number) => {
+      if (!hasValidTestimonials) return
+      const next = (index + validTestimonials.length) % validTestimonials.length
+      activeIndexRef.current = next
+      setActiveIndex(next)
+      if (trackRef.current) {
+        gsap.to(trackRef.current, {
+          xPercent: -next * 100,
+          x: 0,
+          duration: 0.7,
+          ease: 'power3.out',
+        })
+      }
+    },
+    [hasValidTestimonials, validTestimonials.length],
+  )
+
+  // Auto-advance every 7 seconds
+  useEffect(() => {
+    if (!hasValidTestimonials || isPaused) return
+
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prefersReducedMotion) return
+
+    const timer = setInterval(() => {
+      goTo(activeIndexRef.current + 1)
+    }, 7000)
+
+    return () => clearInterval(timer)
+  }, [hasValidTestimonials, isPaused, goTo])
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!hasValidTestimonials) return
+    if (e.key === 'ArrowLeft') {
+      goTo(activeIndexRef.current - 1)
+    } else if (e.key === 'ArrowRight') {
+      goTo(activeIndexRef.current + 1)
     }
   }
 
@@ -114,7 +86,8 @@ export function Partners() {
 
   const finishDrag = () => {
     if (dragStart.current === null) return
-    const width = sectionRef.current?.querySelector('[data-testimonial-window]')?.clientWidth ?? 1
+    const width =
+      sectionRef.current?.querySelector('[data-testimonial-window]')?.clientWidth ?? 1
     const threshold = width * 0.14
     const delta = dragDistance.current
     dragStart.current = null
@@ -126,90 +99,136 @@ export function Partners() {
   return (
     <section
       ref={sectionRef}
+      id="partners"
       data-theme="light"
       aria-labelledby="partners-heading"
-      className="relative overflow-hidden bg-gradient-to-b from-bone via-bone 45% to-ink text-ink"
+      className="relative bg-bone text-ink border-b border-ink/10"
     >
-      <div className="mx-auto w-full max-w-[1440px] px-5 pt-20 md:px-8 md:pt-28">
+      <div className="mx-auto w-full max-w-[1440px] px-5 pt-20 pb-20 md:px-8 md:pt-28 md:pb-28">
+        <p className="font-mono text-xs tracking-[0.18em] text-muted-foreground uppercase md:text-sm">
+          05 / PARTNERS
+        </p>
+
         <h2
           id="partners-heading"
-          className="font-mono text-xs tracking-[0.18em] text-muted-foreground uppercase md:text-sm"
+          className="mt-4 font-serif text-[clamp(2.2rem,5vw,4.5rem)] font-normal leading-[1.08] tracking-tight text-ink max-w-3xl text-balance"
         >
-          05 / PARTNERS
+          Trusted by businesses we&apos;ve built for.
         </h2>
-        <div className="mt-12 grid grid-cols-2 gap-x-6 gap-y-10 border-y border-ink/15 py-8 md:grid-cols-4 md:gap-x-10 md:gap-y-12 md:py-12">
-          {PARTNERS.map((partner, index) => (
-            <div key={partner} className="group flex min-h-12 items-center justify-center">
-              <PartnerMark index={index} />
-            </div>
+
+        {/* 4 Partners grid */}
+        <div className="mt-12 grid grid-cols-2 md:grid-cols-4 border border-ink/15 divide-y md:divide-y-0 divide-x-0 md:divide-x divide-ink/15">
+          {PARTNERS.map((partner) => (
+            <a
+              key={partner.name}
+              href={partner.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Visit ${partner.name}`}
+              className="group flex min-h-[120px] md:min-h-[160px] items-center justify-center p-6 text-center transition-colors hover:bg-black/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+            >
+              {partner.logo ? (
+                <div className="relative h-12 w-36 sm:h-14 sm:w-44 filter grayscale opacity-70 transition-all duration-300 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105">
+                  <Image
+                    src={partner.logo}
+                    alt={partner.alt}
+                    fill
+                    sizes="(min-width: 768px) 25vw, 50vw"
+                    className="object-contain"
+                  />
+                </div>
+              ) : (
+                <span className="font-serif text-lg sm:text-xl font-medium text-ink/70 transition-colors duration-300 group-hover:text-ink">
+                  {partner.name}
+                </span>
+              )}
+            </a>
           ))}
         </div>
       </div>
 
-      <div className="bg-gradient-to-b from-transparent via-ink/80 to-ink pt-28 pb-24 text-bone md:pt-40 md:pb-32">
-        <div className="mx-auto w-full max-w-[1000px] px-5 md:px-8">
-          <p className="font-mono text-[10px] tracking-[0.16em] text-bone/55 uppercase">
-            A few words from the people we build with
-          </p>
-
-          <div className="mt-8 overflow-hidden" data-testimonial-window>
-            <div
-              ref={trackRef}
-              className="flex touch-pan-y cursor-grab active:cursor-grabbing"
-              onPointerDown={handlePointerDown}
-              onPointerMove={handlePointerMove}
-              onPointerUp={finishDrag}
-              onPointerCancel={finishDrag}
-            >
-              {TESTIMONIALS.map((testimonial, index) => (
-                <figure
-                  key={testimonial.name}
-                  aria-hidden={activeIndex !== index}
-                  className="min-w-full select-none px-1"
-                >
-                  <blockquote className="max-w-[900px] font-serif text-[clamp(2.4rem,5.6vw,5.6rem)] leading-[1.02] tracking-tight">
-                    “{testimonial.quote}”
-                  </blockquote>
-                  <figcaption className="mt-8 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <span className="font-mono text-xs tracking-[0.12em] uppercase">
-                      {testimonial.name}
-                    </span>
-                    <span className="font-mono text-[10px] tracking-[0.1em] text-bone/55 uppercase">
-                      {testimonial.role}
-                    </span>
-                  </figcaption>
-                </figure>
-              ))}
+      {/* Testimonials section: Only rendered if real entries exist */}
+      {hasValidTestimonials && (
+        <div
+          className="bg-ink pt-24 pb-24 text-bone md:pt-32 md:pb-32"
+          onKeyDown={handleKeyDown}
+          tabIndex={0}
+          aria-label="Client testimonials slider"
+        >
+          <div className="mx-auto w-full max-w-[1000px] px-5 md:px-8">
+            <div className="flex items-center justify-between">
+              <p className="font-mono text-[10px] tracking-[0.16em] text-bone/55 uppercase">
+                A few words from the people we build with
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsPaused((prev) => !prev)}
+                className="font-mono text-xs uppercase tracking-wider text-bone/60 hover:text-bone px-2 py-1 border border-bone/20 rounded-[2px]"
+                aria-label={isPaused ? 'Resume auto-play' : 'Pause auto-play'}
+              >
+                {isPaused ? 'Resume ▶' : 'Pause ❚❚'}
+              </button>
             </div>
-          </div>
 
-          <div className="mt-10 flex items-center justify-between border-t border-bone/20 pt-5">
-            <span className="font-mono text-[10px] tracking-[0.12em] text-bone/55">
-              {String(activeIndex + 1).padStart(2, '0')} / {String(TESTIMONIALS.length).padStart(2, '0')}
-            </span>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                aria-label="Previous testimonial"
-                disabled={activeIndex === 0}
-                onClick={() => goTo(activeIndexRef.current - 1)}
-                className="flex size-10 items-center justify-center border border-bone/25 font-mono text-lg transition-colors hover:border-bone disabled:opacity-30"
+            <div className="mt-8 overflow-hidden" data-testimonial-window>
+              <div
+                ref={trackRef}
+                className="flex touch-pan-y cursor-grab active:cursor-grabbing"
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={finishDrag}
+                onPointerCancel={finishDrag}
               >
-                ←
-              </button>
-              <button
-                type="button"
-                aria-label="Next testimonial"
-                disabled={activeIndex === TESTIMONIALS.length - 1}
-                onClick={() => goTo(activeIndexRef.current + 1)}
-                className="flex size-10 items-center justify-center border border-bone/25 font-mono text-lg transition-colors hover:border-bone disabled:opacity-30"
-              >
-                →
-              </button>
+                {validTestimonials.map((testimonial, index) => (
+                  <figure
+                    key={testimonial.name}
+                    aria-hidden={activeIndex !== index}
+                    className="min-w-full select-none px-1"
+                  >
+                    <blockquote className="max-w-[900px] font-serif text-[clamp(2.4rem,5.6vw,5.6rem)] leading-[1.02] tracking-tight">
+                      “{testimonial.quote}”
+                    </blockquote>
+                    <figcaption className="mt-8 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                      <span className="font-mono text-xs tracking-[0.12em] uppercase">
+                        {testimonial.name}
+                      </span>
+                      <span className="font-mono text-[10px] tracking-[0.1em] text-bone/55 uppercase">
+                        {testimonial.role}{' '}
+                        {testimonial.company ? `· ${testimonial.company}` : ''}
+                      </span>
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-10 flex items-center justify-between border-t border-bone/20 pt-5">
+              <span className="font-mono text-[10px] tracking-[0.12em] text-bone/55">
+                {String(activeIndex + 1).padStart(2, '0')} /{' '}
+                {String(validTestimonials.length).padStart(2, '0')}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  aria-label="Previous testimonial"
+                  onClick={() => goTo(activeIndexRef.current - 1)}
+                  className="flex size-10 items-center justify-center border border-bone/25 font-mono text-lg transition-colors hover:border-bone focus-visible:ring-1 focus-visible:ring-signal"
+                >
+                  ←
+                </button>
+                <button
+                  type="button"
+                  aria-label="Next testimonial"
+                  onClick={() => goTo(activeIndexRef.current + 1)}
+                  className="flex size-10 items-center justify-center border border-bone/25 font-mono text-lg transition-colors hover:border-bone focus-visible:ring-1 focus-visible:ring-signal"
+                >
+                  →
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </section>
   )
 }

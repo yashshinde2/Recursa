@@ -99,7 +99,7 @@ export function OurJourney() {
       ref={sectionRef}
       data-theme="teal"
       aria-labelledby="journey-heading"
-      className="relative bg-teal text-bone"
+      className="relative bg-teal text-bone overflow-x-clip"
     >
       {/* Film grain effect */}
       <div
@@ -115,11 +115,11 @@ export function OurJourney() {
 
         <h2
           id="journey-heading"
-          className="mt-6 font-serif text-[clamp(2.2rem,5vw,4.5rem)] font-normal leading-[1.08] tracking-tight text-bone max-w-4xl"
+          className="mt-6 font-serif text-[clamp(2.2rem,5vw,4.5rem)] font-normal leading-[1.08] tracking-tight text-bone max-w-4xl text-balance"
         >
-          Five hackathons we entered.{' '}
+          Hackathons we&apos;ve participated in and{' '}
           <span className="relative inline-block font-serif italic text-bone">
-            One we hosted.
+            hosted.
             <span
               className="absolute bottom-1.5 left-0 h-[2.5px] w-full bg-signal"
               aria-hidden="true"
@@ -127,7 +127,7 @@ export function OurJourney() {
           </span>
         </h2>
 
-        <p className="mt-4 font-serif text-lg italic text-bone/75 md:text-xl max-w-2xl">
+        <p className="mt-4 font-serif text-lg italic text-bone/75 md:text-xl max-w-2xl text-pretty">
           Every one taught us something. Every build used it.
         </p>
       </div>
@@ -239,16 +239,16 @@ export function OurJourney() {
 
                       <h3
                         id={`journey-${hackathon.slug}-title`}
-                        className="mt-2 font-serif text-2xl sm:text-3xl lg:text-4xl leading-tight text-bone"
+                        className="mt-2 font-serif text-2xl sm:text-3xl lg:text-4xl leading-tight text-bone text-balance"
                       >
                         {hackathon.title}
                       </h3>
 
-                      <p className="mt-3 font-serif italic text-bone/90 text-base sm:text-lg leading-snug">
+                      <p className="mt-3 font-serif italic text-bone/90 text-base sm:text-lg leading-snug text-pretty">
                         {hackathon.summary}
                       </p>
 
-                      <p className="mt-4 font-sans text-sm sm:text-base leading-relaxed text-bone/75">
+                      <p className="mt-4 font-sans text-sm sm:text-base leading-relaxed text-bone/75 text-pretty">
                         {hackathon.story}
                       </p>
 
@@ -329,12 +329,12 @@ export function OurJourney() {
             <span className="text-signal font-semibold pt-1">return Recursa;</span>
           </div>
 
-          <h3 className="font-serif text-[clamp(2.5rem,7vw,5.5rem)] font-normal leading-[0.95] tracking-tight text-bone">
+          <h3 className="font-serif text-[clamp(2.5rem,7vw,5.5rem)] font-normal leading-[0.95] tracking-tight text-bone text-balance">
             Recursa, today.
           </h3>
 
-          <p className="mx-auto mt-5 max-w-xl font-serif text-base sm:text-lg italic text-bone/75">
-            Born from six intense sprints, 2,000 km journeys, and 40-hour hackathons. We build
+          <p className="mx-auto mt-5 max-w-xl font-serif text-base sm:text-lg italic text-bone/75 text-pretty">
+            Born from intense sprints, 2,000 km journeys, and 40-hour hackathons. We build
             production software with the same speed, craftsmanship, and endurance.
           </p>
 

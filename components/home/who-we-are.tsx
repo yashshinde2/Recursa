@@ -10,10 +10,16 @@ const MANIFESTO = [
   'Then we rebuild, refine, and make the next thing better.',
 ]
 
-const STATS = [
-  { value: 12, label: 'projects shipped' },
-  { value: 8, label: 'hackathons' },
-  { value: 15, label: 'technologies' },
+type StatItem = {
+  value: number
+  suffix?: string
+  label: string
+}
+
+const STATS: StatItem[] = [
+  { value: 12, suffix: '+', label: 'Projects shipped' },
+  { value: 10, suffix: '+', label: 'Hackathons' },
+  { value: 15, suffix: '+', label: 'Technologies' },
 ]
 
 export function WhoWeAre() {
@@ -130,18 +136,24 @@ export function WhoWeAre() {
               index > 0 ? 'border-t md:border-t-0 md:border-l md:pl-8' : ''
             } ${index < STATS.length - 1 ? 'md:pr-8' : ''}`}
           >
-            <span
-              data-stat-counter={stat.value}
-              aria-hidden="true"
-              className="font-serif text-5xl leading-none tabular-nums md:text-6xl"
-            >
-              0
-            </span>
+            <div className="flex items-baseline font-serif text-5xl leading-none tabular-nums md:text-6xl">
+              <span
+                data-stat-counter={stat.value}
+                aria-hidden="true"
+              >
+                0
+              </span>
+              {stat.suffix && (
+                <span className="text-signal" aria-hidden="true">
+                  {stat.suffix}
+                </span>
+              )}
+            </div>
             <span className="font-mono text-xs tracking-[0.12em] text-muted-foreground uppercase md:text-sm">
               {stat.label}
             </span>
             <span className="sr-only">
-              {stat.value} {stat.label}
+              {stat.value}{stat.suffix ?? ''} {stat.label}
             </span>
           </div>
         ))}

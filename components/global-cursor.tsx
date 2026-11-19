@@ -18,12 +18,21 @@ export function GlobalCursor() {
     media.add('(hover: hover) and (pointer: fine)', () => {
       document.documentElement.classList.add('has-custom-cursor')
 
+      let idleTimer: ReturnType<typeof setTimeout> | null = null
+
       const handleMove = (event: PointerEvent) => {
+        const target = event.target
+
+        // Hide inside dialogs (lightboxes, modals)
+        if (target instanceof Element && target.closest('dialog, [role="dialog"]')) {
+          gsap.to(cursor, { autoAlpha: 0, duration: 0.15, overwrite: true })
+          return
+        }
+
         cursor.style.left = `${event.clientX}px`
         cursor.style.top = `${event.clientY}px`
         gsap.to(cursor, { autoAlpha: 1, duration: 0.15, overwrite: true })
 
-        const target = event.target
         const interactive =
           target instanceof Element ? target.closest<HTMLElement>(INTERACTIVE) : null
         const isInteractive = interactive !== null
@@ -34,19 +43,28 @@ export function GlobalCursor() {
         if (cursor.dataset.cursorLabel !== label) {
           cursor.dataset.cursorLabel = label
         }
+
+        if (idleTimer) clearTimeout(idleTimer)
+        idleTimer = setTimeout(() => {
+          gsap.to(cursor, { autoAlpha: 0, duration: 0.25, overwrite: true })
+        }, 3000)
       }
 
       const handleLeave = () => {
+        if (idleTimer) clearTimeout(idleTimer)
         gsap.to(cursor, { autoAlpha: 0, duration: 0.2, overwrite: true })
       }
 
       window.addEventListener('pointermove', handleMove)
       document.documentElement.addEventListener('pointerleave', handleLeave)
+      window.addEventListener('blur', handleLeave)
 
       return () => {
+        if (idleTimer) clearTimeout(idleTimer)
         document.documentElement.classList.remove('has-custom-cursor')
         window.removeEventListener('pointermove', handleMove)
         document.documentElement.removeEventListener('pointerleave', handleLeave)
+        window.removeEventListener('blur', handleLeave)
       }
     })
 

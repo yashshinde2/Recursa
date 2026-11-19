@@ -41,15 +41,7 @@ export function getSectionScrollTop(targetId: string): number | null {
     return pinnedTrigger.start
   }
 
-  // Any other trigger associated with this section
-  const anyTrigger = triggers.find(
-    (st) => st.trigger === element || (st.trigger && element.contains(st.trigger as Node)),
-  )
-  if (anyTrigger && typeof anyTrigger.start === 'number') {
-    return anyTrigger.start
-  }
-
-  // Fallback to top offset
+  // Fallback to top offset for non-pinned sections
   const rect = element.getBoundingClientRect()
   return rect.top + window.scrollY
 }
