@@ -121,7 +121,7 @@ export function Hero({ ready }: HeroProps) {
       ref={sectionRef}
       data-theme="dark"
       aria-labelledby="hero-heading"
-      className="grain relative flex min-h-[calc(100svh-var(--nav-height))] flex-col overflow-hidden"
+      className="grain relative flex min-h-[calc(100svh-var(--nav-height))] flex-col overflow-hidden [&_[data-square]]:!border-steel/55"
     >
       <HeroSquares />
 
@@ -132,23 +132,23 @@ export function Hero({ ready }: HeroProps) {
           data-reveal="pending"
           className="text-[clamp(2.2rem,min(9vw,15svh),8.5rem)] leading-[0.93] font-normal"
         >
-          <span className="block overflow-hidden pb-1 -mb-1">
+          <span className="block overflow-hidden pb-[0.2em] -mb-[0.2em]">
             <span data-hero-line className="block whitespace-nowrap">
               Big problems are
             </span>
           </span>
-          <span className="block overflow-hidden pb-1 -mb-1">
+          <span className="block overflow-hidden pb-[0.2em] -mb-[0.2em]">
             <span data-hero-line className="block whitespace-nowrap">
               just small ones,
             </span>
           </span>
-          <span className="block overflow-hidden pb-1.5 -mb-1.5">
+          <span className="block overflow-hidden pb-[0.2em] -mb-[0.2em]">
             <span data-hero-line className="block whitespace-nowrap">
               <span className="relative inline-block font-serif italic">
                 called again.
                 <span
                   data-hero-underline
-                  className="absolute left-0 bottom-0.5 h-[2px] w-full origin-left bg-signal"
+                  className="absolute left-0 bottom-[-0.12em] h-[2px] w-full origin-left bg-signal"
                 />
               </span>
             </span>
@@ -159,7 +159,7 @@ export function Hero({ ready }: HeroProps) {
           <p
             data-hero-item
             data-reveal="pending"
-            className="max-w-[34rem] font-sans text-base leading-relaxed text-muted-foreground md:text-lg"
+            className="max-w-[40rem] font-sans text-base leading-relaxed text-muted-foreground text-pretty md:text-lg"
           >
             <span className="text-foreground">Recursa Technologies</span>{' '}
             {HERO.description.slice('Recursa Technologies'.length).trimStart()}
