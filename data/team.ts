@@ -1,52 +1,76 @@
+export type TeamMemberLinks = {
+  email: string
+  linkedin: string
+  github: string
+  x: string
+  portfolio?: string
+}
+
 export type TeamMember = {
   name: string
   role: string
-  builds: string
-  portrait: 'architect' | 'designer' | 'engineer' | 'maker' | 'strategist' | 'builder'
-  accent: string
+  title: string
+  image: string
+  imageAlt: string
+  links: TeamMemberLinks
 }
 
 export const TEAM: TeamMember[] = [
   {
-    name: 'Alex Morgan',
-    role: 'Founder & Product',
-    builds: 'I build clear paths from ambitious ideas to useful products.',
-    portrait: 'architect',
-    accent: 'bg-[#c6a58b]',
+    name: 'Yash Sandeep Shinde',
+    role: 'Co-founder',
+    title: 'Software Engineer',
+    image: '/people/yash-shinde.png',
+    imageAlt:
+      'Portrait of Yash Sandeep Shinde, Co-founder and Software Engineer at Recursa Technologies',
+    links: {
+      email: 'yashysshinde@gmail.com',
+      linkedin: 'https://www.linkedin.com/in/yashshinde2',
+      github: 'https://github.com/yashshinde2',
+      x: 'https://x.com/yashshinde__',
+      portfolio: 'https://yash-shinde.vercel.app/',
+    },
   },
   {
-    name: 'Sam Rivera',
-    role: 'Design Lead',
-    builds: 'I build interfaces that feel considered, simple, and human.',
-    portrait: 'designer',
-    accent: 'bg-[#91a5a0]',
+    name: 'Rupesh Bhauso Patil',
+    role: 'Co-founder',
+    title: 'Software Engineer',
+    image: '/people/rupesh-patil.png',
+    imageAlt:
+      'Portrait of Rupesh Bhauso Patil, Co-founder and Software Engineer at Recursa Technologies',
+    links: {
+      email: 'rupeshgbpatil@gmail.com',
+      linkedin: 'https://www.linkedin.com/in/imrupeshpatil',
+      github: 'https://github.com/rupeshpatil-web',
+      x: 'https://x.com/Imrupeshpatil',
+    },
   },
   {
-    name: 'Jordan Lee',
-    role: 'Software Engineer',
-    builds: 'I build dependable systems that make complex things work.',
-    portrait: 'engineer',
-    accent: 'bg-[#b8a0a0]',
+    name: 'Aditya Shivaji Nikam',
+    role: 'Co-founder',
+    title: 'Software Engineer',
+    image: '/people/aditya-nikam.png',
+    imageAlt:
+      'Portrait of Aditya Shivaji Nikam, Co-founder and Software Engineer at Recursa Technologies',
+    links: {
+      email: 'nikama235@gmail.com',
+      linkedin: 'https://www.linkedin.com/in/adityanikam24',
+      github: 'https://github.com/adityanikam1363',
+      x: 'https://x.com/Adityanikam24',
+    },
   },
   {
-    name: 'Taylor Quinn',
-    role: 'Mobile Developer',
-    builds: 'I build small-screen experiences that go wherever life does.',
-    portrait: 'maker',
-    accent: 'bg-[#c4b38d]',
-  },
-  {
-    name: 'Casey Patel',
-    role: 'Connected Products',
-    builds: 'I build bridges between software, sensors, and the world.',
-    portrait: 'strategist',
-    accent: 'bg-[#9aa4bc]',
-  },
-  {
-    name: 'Riley Chen',
-    role: 'Delivery & Strategy',
-    builds: 'I build momentum by keeping teams focused on what matters.',
-    portrait: 'builder',
-    accent: 'bg-[#ba9bb0]',
+    name: 'Arya Sanjay Nigavekar',
+    role: 'Co-founder',
+    title: 'Software Engineer',
+    image: '/people/ary-nigavekar.png',
+    imageAlt:
+      'Portrait of Arya Sanjay Nigavekar, Co-founder and Software Engineer at Recursa Technologies',
+    links: {
+      email: 'aryanigavekar@gmail.com',
+      linkedin: 'https://www.linkedin.com/in/aryanigavakar/',
+      github: 'https://github.com/Arya2005-ni',
+      x: 'https://x.com/AryaN24393',
+    },
   },
 ]

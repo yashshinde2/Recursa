@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { Team } from '@/components/home/team'
+import { SectionLabel } from '@/components/section-label'
 import { breadcrumbJsonLd, canonicalUrl, jsonLdScript } from '@/lib/seo'
 
 export const metadata: Metadata = {
@@ -50,7 +51,10 @@ export default function TeamPage() {
           </span>
           Back to home
         </Link>
-        <h1 className="mt-8 font-serif text-5xl leading-[0.92] tracking-tight md:text-7xl lg:text-8xl">
+        <div className="mt-8 mb-4">
+          <SectionLabel>07 / The team</SectionLabel>
+        </div>
+        <h1 className="mt-4 font-serif text-5xl leading-[0.92] tracking-tight md:text-7xl lg:text-8xl">
           The people behind Recursa
         </h1>
       </div>

@@ -1,82 +1,205 @@
-import { TEAM } from '@/data/team'
+'use client'
 
-function PortraitPlaceholder({
-  portrait,
-  accent,
-}: {
-  portrait: (typeof TEAM)[number]['portrait']
-  accent: string
-}) {
-  return (
-    <div
-      aria-hidden="true"
-      className={`relative aspect-[0.82/1] overflow-hidden ${accent} saturate-0 transition-[filter] duration-700 ease-out group-hover:saturate-100`}
-    >
-      <div className="absolute inset-0 bg-gradient-to-br from-bone/20 via-transparent to-ink/35" />
-      <div className="absolute inset-x-0 bottom-[-8%] mx-auto h-[57%] w-[75%] rounded-t-[48%] bg-ink/55" />
-      <div
-        className={`absolute top-[15%] left-1/2 h-[39%] w-[39%] -translate-x-1/2 rounded-[45%_45%_42%_42%] bg-ink/65 ${
-          portrait === 'designer' || portrait === 'maker' ? 'rotate-[-4deg]' : ''
-        }`}
-      >
-        <span className="absolute top-[42%] left-[18%] h-1 w-1 rounded-full bg-bone/70" />
-        <span className="absolute top-[42%] right-[18%] h-1 w-1 rounded-full bg-bone/70" />
-        <span className="absolute right-[35%] bottom-[23%] left-[35%] h-px bg-bone/50" />
-      </div>
-      <span className="absolute right-3 bottom-3 font-mono text-[9px] tracking-[0.12em] text-bone/75 uppercase">
-        portrait / {portrait}
-      </span>
-    </div>
-  )
-}
+import Image from 'next/image'
+import { useRef } from 'react'
+
+import {
+  EmailIcon,
+  GitHubIcon,
+  LinkedInIcon,
+  SocialButton,
+  XIcon,
+} from '@/components/social-icons'
+import { TEAM } from '@/data/team'
+import { gsap, useGSAP } from '@/lib/gsap'
+import { cn } from '@/lib/utils'
+
+// Tunable object-position constant for all 4 portraits
+const OBJECT_POSITION = 'object-[50%_15%]'
+
+// Fixed warm sand background constant for cutout portrait frames
+const SAND_BG = '#E3DCCD'
 
 export function Team() {
+  const containerRef = useRef<HTMLElement>(null)
+  const gridRef = useRef<HTMLDivElement>(null)
+
+  useGSAP(
+    () => {
+      const grid = gridRef.current
+      if (!grid) return
+
+      const media = gsap.matchMedia()
+
+      media.add('(prefers-reduced-motion: no-preference)', () => {
+        const cards = grid.querySelectorAll<HTMLElement>('[data-team-card]')
+        if (!cards.length) return
+
+        gsap.fromTo(
+          cards,
+          { autoAlpha: 0, y: 32 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: grid,
+              start: 'top 85%',
+              once: true,
+            },
+          },
+        )
+      })
+
+      return () => media.revert()
+    },
+    { scope: containerRef },
+  )
+
   return (
     <section
       id="team"
+      ref={containerRef}
       data-theme="light"
       aria-labelledby="team-heading"
       className="relative bg-bone text-ink"
     >
-      <div className="mx-auto w-full max-w-[1440px] px-5 pt-20 pb-20 md:px-8 md:pt-28 md:pb-28">
-        <div className="mb-12 flex flex-wrap items-end justify-between gap-6 md:mb-16">
-          <div>
-            <h2
-              id="team-heading"
-              className="font-mono text-xs tracking-[0.18em] text-muted-foreground uppercase md:text-sm"
-            >
-              07 / THE TEAM
-            </h2>
-            <p className="mt-5 max-w-2xl font-serif text-4xl leading-[0.98] tracking-tight md:text-6xl">
-              A small team, curious by nature.
-            </p>
-          </div>
-          <p className="max-w-sm text-sm leading-relaxed text-muted-foreground md:text-base">
-            Different disciplines, one shared instinct: make the next version better.
-          </p>
-        </div>
+      <div className="mx-auto w-full max-w-[1440px] px-5 pt-8 pb-20 md:px-8 md:pt-10 md:pb-28">
+        <h2 id="team-heading" className="sr-only">
+          The Team
+        </h2>
 
-        <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 md:gap-x-6 md:gap-y-14">
+        <div
+          ref={gridRef}
+          className="grid grid-cols-2 gap-x-6 gap-y-14 lg:grid-cols-4"
+        >
           {TEAM.map((member, index) => (
-            <article key={member.name} className="group min-w-0">
-              <div className="relative overflow-hidden">
-                <PortraitPlaceholder portrait={member.portrait} accent={member.accent} />
-                <div className="absolute inset-x-0 bottom-0 translate-y-full bg-ink/90 p-4 text-bone transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 md:p-5">
-                  <p className="font-serif text-lg italic leading-snug md:text-2xl">
-                    “{member.builds}”
-                  </p>
+            <article
+              key={member.name}
+              data-team-card
+              className="group flex flex-col"
+            >
+              <div
+                className="relative aspect-[4/5] w-full overflow-hidden rounded-[2px]"
+                style={{ backgroundColor: SAND_BG }}
+              >
+                {/* Concentric nested-squares outline (ink stroke at ~8% opacity) */}
+                <svg
+                  viewBox="0 0 200 250"
+                  fill="none"
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 h-full w-full stroke-ink/[0.08]"
+                >
+                  <rect
+                    x="30"
+                    y="45"
+                    width="140"
+                    height="160"
+                    rx="2"
+                    strokeWidth="1"
+                    transform="rotate(-4 100 125)"
+                  />
+                  <rect
+                    x="48"
+                    y="63"
+                    width="104"
+                    height="124"
+                    rx="2"
+                    strokeWidth="1"
+                    transform="rotate(2 100 125)"
+                  />
+                  <rect
+                    x="65"
+                    y="80"
+                    width="70"
+                    height="90"
+                    rx="2"
+                    strokeWidth="1"
+                    transform="rotate(-1 100 125)"
+                  />
+                </svg>
+
+                {/* 10px solid signal-orange square in bottom-right corner */}
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute right-3 bottom-3 z-10 size-2.5 bg-signal"
+                />
+
+                <Image
+                  src={member.image}
+                  alt={member.imageAlt}
+                  fill
+                  sizes="(min-width: 1024px) 25vw, 50vw"
+                  priority={index < 2}
+                  className={cn(
+                    'object-cover',
+                    OBJECT_POSITION,
+                    'grayscale contrast-[1.05] transition-[filter] duration-500 ease-out',
+                    '[@media(hover:hover)]:group-hover:grayscale-0 [@media(hover:hover)]:group-hover:contrast-100',
+                    'group-focus-within:grayscale-0 group-focus-within:contrast-100',
+                  )}
+                />
+              </div>
+
+              <div className="mt-5 flex flex-col">
+                <div className="flex min-h-[3.5rem] items-start sm:min-h-[4rem] lg:min-h-[4.75rem]">
+                  <h3 className="font-serif text-2xl leading-[1.08] text-ink md:text-3xl">
+                    {member.name}
+                  </h3>
                 </div>
+
+                <p className="mt-2 font-mono text-xs tracking-[0.16em] uppercase text-foreground">
+                  {member.role}
+                </p>
+                <p className="mt-0.5 font-mono text-xs tracking-[0.16em] uppercase text-muted-foreground">
+                  {member.title}
+                </p>
+
+                <div className="my-4 h-px w-full bg-ink/15" />
+
+                <div className="flex items-center gap-2">
+                  <SocialButton
+                    href={`mailto:${member.links.email}`}
+                    label={`Email ${member.name}`}
+                    isEmail
+                  >
+                    <EmailIcon />
+                  </SocialButton>
+                  <SocialButton
+                    href={member.links.linkedin}
+                    label={`${member.name} on LinkedIn`}
+                  >
+                    <LinkedInIcon />
+                  </SocialButton>
+                  <SocialButton
+                    href={member.links.github}
+                    label={`${member.name} on GitHub`}
+                  >
+                    <GitHubIcon />
+                  </SocialButton>
+                  <SocialButton
+                    href={member.links.x}
+                    label={`${member.name} on X`}
+                  >
+                    <XIcon />
+                  </SocialButton>
+                </div>
+
+                {member.links.portfolio && (
+                  <div className="mt-3">
+                    <a
+                      href={member.links.portfolio}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 font-mono text-xs uppercase tracking-wider text-muted-foreground transition-colors duration-300 hover:text-signal focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-signal"
+                    >
+                      Portfolio <span aria-hidden="true">↗</span>
+                    </a>
+                  </div>
+                )}
               </div>
-              <div className="mt-4 flex items-baseline justify-between gap-2">
-                <h3 className="font-serif text-xl leading-none md:text-3xl">{member.name}</h3>
-                <span className="font-mono text-[9px] tracking-[0.1em] text-muted-foreground">
-                  {String(index + 1).padStart(2, '0')}
-                </span>
-              </div>
-              <p className="mt-2 font-mono text-[9px] tracking-[0.12em] text-muted-foreground uppercase md:text-[10px]">
-                {member.role}
-              </p>
-              <p className="sr-only">{member.builds}</p>
             </article>
           ))}
         </div>
