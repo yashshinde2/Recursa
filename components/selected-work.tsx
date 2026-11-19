@@ -157,7 +157,7 @@ export function SelectedWork() {
 
     if (nextVideo) {
       if (shouldPlayVideos) {
-        nextVideo.play().catch(() => {})
+        nextVideo.play().catch(() => { })
       } else {
         nextVideo.pause()
       }
@@ -443,11 +443,10 @@ export function SelectedWork() {
                   </div>
 
                   <span
-                    className={`mt-1 font-serif text-lg leading-tight transition-colors duration-300 md:text-2xl ${
-                      isActive
-                        ? 'font-normal text-ink'
-                        : 'text-ink/60 group-hover:text-ink'
-                    }`}
+                    className={`mt-1 font-serif text-lg leading-tight transition-colors duration-300 md:text-2xl ${isActive
+                      ? 'font-normal text-ink'
+                      : 'text-ink/60 group-hover:text-ink'
+                      }`}
                   >
                     {project.name}
                   </span>
