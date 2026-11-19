@@ -5,31 +5,30 @@ import { useRef, useState } from 'react'
 import { gsap, useGSAP } from '@/lib/gsap'
 
 const PARTNERS = [
-  'PARTNER 01',
-  'PARTNER 02',
-  'PARTNER 03',
-  'PARTNER 04',
-  'PARTNER 05',
-  'PARTNER 06',
-  'PARTNER 07',
-  'PARTNER 08',
+  'DYPSEM College',
+  'Dhanashree Foods',
+  'Sakhis Dwikala',
+  'StickerDump.exe',
+  'Infilemon Technologies PVT LTD',
+  'KD Export',
+  'House of 666',
 ]
 
 const TESTIMONIALS = [
   {
     quote: 'They made the complicated feel clear, and gave our team the confidence to move.',
-    name: 'A. Placeholder',
-    role: 'Founder · Northstar',
+    name: 'Rugved Shelke',
+    role: 'CEO & Co-founder · StickerDump.exe',
   },
   {
     quote: 'A thoughtful partner from the first sketch to the moment we shipped.',
-    name: 'M. Placeholder',
-    role: 'Product Lead · Forma',
+    name: 'Shravani Patil',
+    role: 'Co-Founder · Sakhis Dwikala',
   },
   {
     quote: 'They listened closely, built with care, and kept asking how it could be better.',
-    name: 'R. Placeholder',
-    role: 'Co-founder · Fieldnote',
+    name: 'Yash Khude',
+    role: 'Co-Founder · Dhanashree Foods',
   },
 ]
 
