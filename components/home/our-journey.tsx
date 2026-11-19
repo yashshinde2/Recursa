@@ -210,6 +210,7 @@ export function OurJourney() {
 
   return (
     <section
+      id="journey"
       ref={sectionRef}
       data-theme="teal"
       aria-labelledby="journey-heading"

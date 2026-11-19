@@ -1,5 +1,6 @@
 import { HomeIntro } from '@/components/home/home-intro'
 import { Contact } from '@/components/home/contact'
+import { JourneySkip } from '@/components/journey-skip'
 import { OurJourney } from '@/components/home/our-journey'
 import { Partners } from '@/components/home/partners'
 import { SelectedWork } from '@/components/selected-work'
@@ -16,6 +17,7 @@ export default function Page() {
       <Services />
       <Partners />
       <OurJourney />
+      <JourneySkip />
       <TeamTeaser />
       <Contact />
     </main>
