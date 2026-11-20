@@ -252,7 +252,8 @@
   /* RevealText: keep copy hidden until its lines are split, but only when
      scripting runs and motion is welcome, so it can never get stuck hidden. */
   @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
-    [data-reveal='pending'] {
+    [data-reveal='pending'],
+    [data-hero-logo] {
       visibility: hidden;
     }
   }

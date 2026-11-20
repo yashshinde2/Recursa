@@ -1,13 +1,16 @@
 'use client'
 
+import Image from 'next/image'
 import { useRef } from 'react'
 
 import { HeroSquares } from '@/components/home/hero-squares'
 import { MagneticButton } from '@/components/magnetic-button'
 import { useLenis } from '@/components/smooth-scroll'
-import { gsap, useGSAP } from '@/lib/gsap'
+import { gsap, ScrollTrigger, useGSAP } from '@/lib/gsap'
 import { scrollToSection } from '@/lib/scroll-to'
 import { HERO, PRIMARY_CTA } from '@/lib/site'
+
+const LOGO_NUDGE_Y = -3
 
 type HeroProps = {
   /** False while the loader still covers the page; the intro waits for it. */
@@ -38,11 +41,22 @@ export function Hero({ ready }: HeroProps) {
         const squares = select('[data-hero-squares]')[0] as HTMLElement
         const items = select('[data-hero-item]') as HTMLElement[]
         const cue = select('[data-hero-cue]')[0]
+        const logo = select('[data-hero-logo]:not([data-hero-logo-m])')[0] as HTMLElement
+        const glow = select('[data-hero-glow]')[0] as HTMLElement
+        const tilt = select('[data-hero-tilt]')[0] as HTMLElement
+        const logoM = select('[data-hero-logo-m]')[0] as HTMLElement
+        const glowM = select('[data-hero-glow-m]')[0] as HTMLElement
+        const floatM = select('[data-hero-float-m]')[0] as HTMLElement
 
         headline.dataset.reveal = 'ready'
         for (const element of [squares, ...items]) {
           element.dataset.reveal = 'ready'
         }
+
+        if (logo) gsap.set(logo, { autoAlpha: 0, scale: 0.72, y: 30 })
+        if (glow) gsap.set(glow, { autoAlpha: 0 })
+        if (logoM) gsap.set(logoM, { autoAlpha: 0, scale: 0.8, y: 20 })
+        if (glowM) gsap.set(glowM, { autoAlpha: 0 })
 
         gsap.fromTo(
           lines,
@@ -99,7 +113,128 @@ export function Hero({ ready }: HeroProps) {
             repeatDelay: 0.2,
           },
         )
+
+        const ambientTweens: (gsap.core.Tween | gsap.core.Timeline)[] = []
+
+        if (logo) {
+          gsap.to(logo, {
+            autoAlpha: 1,
+            scale: 1,
+            y: 0,
+            duration: 1.8,
+            delay: 0.35,
+            ease: 'power3.out',
+            onComplete: () => {
+              if (tilt) {
+                const floatY = gsap.fromTo(
+                  tilt,
+                  { y: -10 },
+                  { y: 10, duration: 5, ease: 'sine.inOut', yoyo: true, repeat: -1 },
+                )
+                const floatRot = gsap.fromTo(
+                  tilt,
+                  { rotation: -0.6 },
+                  { rotation: 0.6, duration: 9, ease: 'sine.inOut', yoyo: true, repeat: -1 },
+                )
+                ambientTweens.push(floatY, floatRot)
+              }
+            },
+          })
+        }
+
+        if (glow) {
+          gsap.to(glow, {
+            autoAlpha: 1,
+            duration: 2.2,
+            delay: 0.35,
+            ease: 'power2.out',
+          })
+        }
+
+        if (logoM) {
+          gsap.to(logoM, {
+            autoAlpha: 1,
+            scale: 1,
+            y: 0,
+            duration: 1.4,
+            delay: 0.35,
+            ease: 'power3.out',
+            onComplete: () => {
+              if (floatM) {
+                const floatYM = gsap.fromTo(
+                  floatM,
+                  { y: -8 },
+                  { y: 8, duration: 5, ease: 'sine.inOut', yoyo: true, repeat: -1 },
+                )
+                ambientTweens.push(floatYM)
+              }
+            },
+          })
+        }
+
+        if (glowM) {
+          gsap.to(glowM, {
+            autoAlpha: 1,
+            duration: 2.2,
+            delay: 0.35,
+            ease: 'power2.out',
+          })
+        }
+
+        const visibility = ScrollTrigger.create({
+          trigger: section,
+          start: 'top bottom',
+          end: 'bottom top',
+          onToggle: (self) => {
+            ambientTweens.forEach((t) => t.paused(!self.isActive))
+          },
+        })
+
+        return () => visibility.kill()
       })
+
+      media.add(
+        '(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)',
+        () => {
+          const select = gsap.utils.selector(section)
+          const tilt = select('[data-hero-tilt]')[0] as HTMLElement
+          if (!tilt) return
+
+          const settle = { duration: 1.2, ease: 'power3.out' }
+          gsap.set(tilt, { transformPerspective: 900 })
+          const toX = gsap.quickTo(tilt, 'x', settle)
+          const toY = gsap.quickTo(tilt, 'y', settle)
+          const toRotY = gsap.quickTo(tilt, 'rotationY', settle)
+          const toRotX = gsap.quickTo(tilt, 'rotationX', settle)
+
+          const handleMove = (event: PointerEvent) => {
+            const rawX = (event.clientX / window.innerWidth - 0.5) * 2
+            const rawY = (event.clientY / window.innerHeight - 0.5) * 2
+            const nx = -rawX
+            const ny = -rawY
+
+            toX(nx * 14)
+            toY(ny * 10)
+            toRotY(nx * 6)
+            toRotX(-ny * 4)
+          }
+
+          const handleLeave = () => {
+            toX(0)
+            toY(0)
+            toRotY(0)
+            toRotX(0)
+          }
+
+          window.addEventListener('pointermove', handleMove)
+          document.documentElement.addEventListener('pointerleave', handleLeave)
+
+          return () => {
+            window.removeEventListener('pointermove', handleMove)
+            document.documentElement.removeEventListener('pointerleave', handleLeave)
+          }
+        },
+      )
 
       media.add('(prefers-reduced-motion: reduce)', () => {
         const select = gsap.utils.selector(section)
@@ -108,6 +243,10 @@ export function Hero({ ready }: HeroProps) {
         const underline = select('[data-hero-underline]')[0] as HTMLElement
         const squares = select('[data-hero-squares]')[0] as HTMLElement
         const items = select('[data-hero-item]') as HTMLElement[]
+        const logo = select('[data-hero-logo]:not([data-hero-logo-m])')[0] as HTMLElement
+        const glow = select('[data-hero-glow]')[0] as HTMLElement
+        const logoM = select('[data-hero-logo-m]')[0] as HTMLElement
+        const glowM = select('[data-hero-glow-m]')[0] as HTMLElement
 
         if (headline) headline.dataset.reveal = 'ready'
         for (const element of [squares, ...items]) {
@@ -117,6 +256,11 @@ export function Hero({ ready }: HeroProps) {
         if (underline) gsap.set(underline, { scaleX: 1 })
         if (squares) gsap.set(squares, { autoAlpha: 1, scale: 1 })
         gsap.set(items, { autoAlpha: 1, y: 0 })
+
+        if (logo) gsap.set(logo, { autoAlpha: 1, scale: 1, y: 0 })
+        if (glow) gsap.set(glow, { autoAlpha: 1 })
+        if (logoM) gsap.set(logoM, { autoAlpha: 1, scale: 1, y: 0 })
+        if (glowM) gsap.set(glowM, { autoAlpha: 1 })
       })
 
       return () => media.revert()
@@ -134,7 +278,76 @@ export function Hero({ ready }: HeroProps) {
     >
       <HeroSquares />
 
+      {/* In-spiral 3D Logo (Desktop) */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-10 hidden overflow-hidden lg:block"
+      >
+        <div className="absolute top-1/2 left-1/2 aspect-square h-[135%] -translate-x-1/2 -translate-y-1/2 lg:left-[64%]">
+          <div className="absolute inset-0 flex items-center justify-center">
+            {/* Glow behind the logo */}
+            <div
+              data-hero-glow
+              className="absolute aspect-square w-[clamp(420px,39vw,750px)] rounded-full"
+              style={{
+                background:
+                  'radial-gradient(circle, rgba(255, 90, 31, 0.18) 0%, rgba(255, 90, 31, 0) 70%)',
+              }}
+            />
+
+            {/* Logo outer for float/entrance, inner for mouse tilt */}
+            <div
+              data-hero-logo
+              style={{
+                transform: `translateY(${LOGO_NUDGE_Y}%)`,
+              }}
+            >
+              <div data-hero-tilt className="will-change-transform">
+                <Image
+                  src="/brand/recursa-3d-hero.webp"
+                  width={1400}
+                  height={832}
+                  alt=""
+                  sizes="(min-width: 1024px) 34vw, 70vw"
+                  priority
+                  draggable={false}
+                  className="h-auto w-[clamp(300px,28vw,540px)] select-none"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="relative mx-auto flex w-full max-w-[1440px] flex-1 flex-col justify-center px-5 py-16 md:px-8">
+        {/* Mobile & Tablet 3D Logo */}
+        <div
+          data-hero-logo
+          data-hero-logo-m
+          className="relative self-end -mr-3 mb-6 w-[min(64vw,320px)] lg:hidden"
+        >
+          <div
+            data-hero-glow-m
+            aria-hidden="true"
+            className="pointer-events-none absolute -inset-6 -z-10 rounded-full"
+            style={{
+              background:
+                'radial-gradient(circle, rgba(255, 90, 31, 0.18) 0%, rgba(255, 90, 31, 0) 70%)',
+            }}
+          />
+          <div data-hero-float-m className="will-change-transform">
+            <Image
+              src="/brand/recursa-3d-hero.webp"
+              width={1400}
+              height={832}
+              alt=""
+              loading="lazy"
+              draggable={false}
+              className="h-auto w-full select-none"
+            />
+          </div>
+        </div>
+
         <h1
           id="hero-heading"
           data-hero-headline
