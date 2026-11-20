@@ -79,6 +79,121 @@ export type SelectedProject = {
 
 export const SELECTED_PROJECTS: SelectedProject[] = [
   {
+    slug: 'kd-export',
+    name: 'KD Export CRM',
+    category: 'SAAS / AGRI EXPORT CRM',
+    problem:
+      'A global banana exporter and cold-storage enterprise needed a specialized CRM to manage 1,500+ farmers, harvest batches, international buyers, and multi-currency billing.',
+    built:
+      'A custom cloud CRM and export operations platform connecting field agents, cold storage logs, and global shipment tracking.',
+    result:
+      'Streamlined operations across 12+ destination countries with real-time farmer settlement tracking.',
+    approach:
+      'We mapped the physical supply chain from farm gate to refrigerated container, designing role-based workflows for field procurement, quality grading, and automated export documentation.',
+    solution:
+      'A fast web-based CRM with offline-first field logging, multi-currency invoicing, container telemetry integration, and automated farmer ledger reconciliation.',
+    results: [
+      '1,500+ active farmers managed seamlessly',
+      'Operations tracking across 12+ export countries',
+      'Eliminated manual paperwork in cold storage dispatch',
+    ],
+    technologies: ['Next.js', 'TypeScript', 'PostgreSQL', 'Tailwind CSS', 'Cloud Infrastructure'],
+    gallery: ['Farmer CRM Dashboard', 'Shipment & Container Tracker', 'Ledger & Settlement View'],
+    visual: 'dashboard',
+  },
+  {
+    slug: 'house-of-666',
+    name: 'House of 666',
+    category: 'WEB / HOSPITALITY & BRAND',
+    problem:
+      'A premier restaurant & café in Kolhapur needed a distinctive digital experience reflecting its royal, coastal architectural atmosphere.',
+    built:
+      'A branded, animated digital flagship with interactive menus, ambient visuals, reservation integration, and location discovery.',
+    result:
+      'Live in production with a 5.0 Google rating showcased directly on the homepage and high reservation conversion.',
+    approach:
+      'We translated the physical restaurant’s luxury aesthetic into digital form, pairing bespoke serif typography and gold accents with responsive performance.',
+    solution:
+      'An expressive Next.js experience featuring smooth micro-interactions, responsive digital menus, and clear booking pathways.',
+    results: [
+      '5.0 Google rating maintained',
+      '100% responsive across mobile and desktop',
+      'Sub-second load times with high-resolution imagery',
+    ],
+    technologies: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'GSAP'],
+    gallery: ['Editorial Homepage', 'Digital Menu Experience', 'Reservation & Story View'],
+    visual: 'commerce',
+  },
+  {
+    slug: 'stickerdump',
+    name: 'StickerDump.exe',
+    category: 'MOBILE / E-COMMERCE & CREATOR APP',
+    problem:
+      'A fast-growing custom sticker and merchandise company needed a mobile-first app for customers to design, customize, and order premium sticker packs.',
+    built:
+      'A playful, high-performance mobile application with real-time sticker preview, bundle builder, and instant checkout.',
+    result:
+      'Delivered high engagement and frictionless ordering for sticker drops and custom artist collaborations.',
+    approach:
+      'We built a mobile experience that feels tactile and snappy, optimizing image rendering for custom die-cut previews on touch screens.',
+    solution:
+      'A cross-platform app featuring an interactive pack builder, live vector die-cut rendering, and one-tap checkout.',
+    results: [
+      'Smooth 60fps pack customizer',
+      'Instant checkout flow with digital wallet integration',
+      'Scalable architecture for high-traffic collection drops',
+    ],
+    technologies: ['React Native', 'TypeScript', 'Mobile Payments', 'Cloud Storage'],
+    gallery: ['Interactive Pack Customizer', 'Artist Collaboration Feed', 'One-Tap Checkout Flow'],
+    visual: 'mobile',
+  },
+  {
+    slug: 'e-tongue',
+    name: 'E-Tongue',
+    category: 'IOT / BIO-SENSOR & TASTE TELEMETRY',
+    problem:
+      'Food and pharmaceutical manufacturers lacked portable, real-time taste profile analysis without slow laboratory chemical testing.',
+    built:
+      'A connected multi-sensor electronic tongue hardware device and real-time telemetry dashboard for rapid liquid taste analysis.',
+    result:
+      'Instant classification of taste signatures and contaminant detection with high reproducibility.',
+    approach:
+      'We connected specialized potentiometric sensor arrays to an embedded gateway, streaming signal data to cloud inference models.',
+    solution:
+      'A unified IoT system encompassing device firmware, BLE/Wi-Fi telemetry pipeline, and a web dashboard visualizing chemical response curves.',
+    results: [
+      'Real-time sensor curve telemetry',
+      'Portable field testing without lab delays',
+      'Automated anomaly detection in liquid samples',
+    ],
+    technologies: ['Embedded C++', 'IoT Telemetry', 'Next.js', 'TypeScript', 'Signal Processing'],
+    gallery: ['Sensor Array Telemetry', 'Taste Fingerprint Radar', 'Batch Quality Analysis'],
+    visual: 'iot',
+  },
+  {
+    slug: 'smart-bharat-ai',
+    name: 'Smart Bharat AI',
+    category: 'AI & AUTOMATION / MULTILINGUAL ASSISTANT',
+    problem:
+      'Rural citizens faced digital exclusion due to complex English-first interfaces and low literacy barriers.',
+    built:
+      'A multilingual voice AI assistant and automated service dispatcher working across regional Indian languages.',
+    result:
+      'First prize winner at SGU Prabal Hackathon; validated across diverse regional dialects.',
+    approach:
+      'We designed around speech-first interaction, using local dialect translation and automated workflow execution.',
+    solution:
+      'An automated agent framework connecting speech recognition, localized LLM reasoning, and automated voice response.',
+    results: [
+      'Low-latency regional language voice processing',
+      'Hands-free automated request dispatching',
+      'Simple enough for non-technical rural users',
+    ],
+    technologies: ['Python', 'Voice AI APIs', 'FastAPI', 'Next.js', 'Speech Recognition'],
+    gallery: ['Voice Interaction Canvas', 'Workflow Dispatcher', 'Dialect Accuracy Monitor'],
+    visual: 'dashboard',
+  },
+  {
     slug: 'northstar',
     name: 'Northstar',
     category: 'SAAS / ANALYTICS',

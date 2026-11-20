@@ -44,7 +44,7 @@ export const SERVICES: ServicePage[] = [
       { title: 'Improve with intent', description: 'Measure real use, prioritize what matters, and evolve the platform.' },
     ],
     technologies: ['Next.js', 'React', 'TypeScript', 'Node.js', 'PostgreSQL', 'Cloud infrastructure'],
-    relatedProjectSlugs: ['northstar'],
+    relatedProjectSlugs: ['kd-export', 'northstar'],
     faqs: [
       { question: 'Can you help take an idea from concept to launch?', answer: 'Yes. We can work from early discovery and product definition through design, engineering, testing, and launch.' },
       { question: 'Can you join an existing product team?', answer: 'Yes. We can contribute as a focused delivery partner, strengthen a specific area, or work alongside your in-house team.' },
@@ -71,7 +71,7 @@ export const SERVICES: ServicePage[] = [
       { title: 'Launch and learn', description: 'Test across devices, ship with confidence, and refine from feedback.' },
     ],
     technologies: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Content platforms', 'Web performance'],
-    relatedProjectSlugs: ['forma'],
+    relatedProjectSlugs: ['house-of-666', 'forma'],
     faqs: [
       { question: 'Do you build both marketing sites and web applications?', answer: 'Yes. We work on brand and content-led websites as well as interactive web products and customer portals.' },
       { question: 'Will the site work on mobile and assistive technology?', answer: 'Responsive behavior and accessibility are part of the design and implementation process from the start.' },
@@ -98,7 +98,7 @@ export const SERVICES: ServicePage[] = [
       { title: 'Release and evolve', description: 'Prepare for launch, learn from use, and improve with each iteration.' },
     ],
     technologies: ['React Native', 'TypeScript', 'iOS', 'Android', 'API integration', 'App analytics'],
-    relatedProjectSlugs: ['stride'],
+    relatedProjectSlugs: ['stickerdump', 'stride'],
     faqs: [
       { question: 'Do you build for both iOS and Android?', answer: 'Yes. We can recommend a native or cross-platform approach based on the product, audience, and constraints.' },
       { question: 'Can the app connect to our existing services?', answer: 'We can integrate with existing APIs and systems, and help define new service interfaces where needed.' },
@@ -125,7 +125,7 @@ export const SERVICES: ServicePage[] = [
       { title: 'Deploy and observe', description: 'Test in context, monitor performance, and improve from real-world signals.' },
     ],
     technologies: ['IoT protocols', 'Device gateways', 'Cloud services', 'TypeScript', 'Telemetry', 'Data visualization'],
-    relatedProjectSlugs: ['fieldnote'],
+    relatedProjectSlugs: ['e-tongue', 'fieldnote'],
     faqs: [
       { question: 'Can you work with devices we already have?', answer: 'Often, yes. We begin by understanding device capabilities, protocols, connectivity, and constraints.' },
       { question: 'Can you build the dashboard as well as the data pipeline?', answer: 'Yes. We can work across device connectivity, backend services, data handling, and user-facing tools.' },
@@ -134,6 +134,33 @@ export const SERVICES: ServicePage[] = [
     metadata: {
       title: 'IoT Solutions',
       description: 'Build connected products and IoT software with Recursa, from device integration to useful data experiences.',
+    },
+  },
+  {
+    slug: 'ai-automation',
+    name: 'AI & Automation',
+    eyebrow: 'INTELLIGENT SYSTEMS / 05',
+    headline: 'Workflows that think, adapt, and scale.',
+    description:
+      'We build custom AI integrations, LLM workflows, and intelligent automation that eliminate operational bottlenecks.',
+    intro:
+      'Real AI value comes from targeted automation that fits naturally into existing business processes. We design reliable pipelines, fine-tune models, and deploy AI systems with zero latency waste.',
+    process: [
+      { title: 'Audit the workflow', description: 'Identify high-friction manual tasks, data flows, and automation opportunities.' },
+      { title: 'Architect the pipeline', description: 'Design model interfaces, context retrieval, fallback rules, and verification checks.' },
+      { title: 'Build and train', description: 'Implement agents, integrate APIs, validate prompt pipelines, and optimize response latency.' },
+      { title: 'Deploy and monitor', description: 'Launch into production with real-time observability, accuracy logging, and continuous tuning.' },
+    ],
+    technologies: ['Python', 'LangChain', 'FastAPI', 'OpenAI & Claude APIs', 'Vector Databases', 'Workflow Automation'],
+    relatedProjectSlugs: ['smart-bharat-ai'],
+    faqs: [
+      { question: 'How do you ensure AI outputs are accurate and safe?', answer: 'We build deterministic validation layers, strict schemas, fallback mechanisms, and human-in-the-loop verification into every pipeline.' },
+      { question: 'Can you integrate AI into our existing software stack?', answer: 'Yes. We connect AI models directly to your existing databases, CRMs, APIs, and communication tools.' },
+      { question: 'Do you only use LLMs or traditional automation too?', answer: 'We use the right tool for the job—combining fast programmatic rules with machine learning and generative models where they deliver true advantage.' },
+    ],
+    metadata: {
+      title: 'AI & Automation',
+      description: 'Custom AI workflows, intelligent automation, and LLM integrations engineered for business impact with Recursa.',
     },
   },
 ]

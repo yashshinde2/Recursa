@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 
-const NEEDS = new Set(['SaaS', 'Web', 'Mobile', 'IoT', 'Not sure'])
+const NEEDS = new Set(['SaaS', 'Web', 'Mobile', 'IoT', 'AI & Automation', 'Not sure'])
 const BUDGETS = new Set(['Under $5k', '$5k–$15k', '$15k–$50k', '$50k+'])
 const TIMELINES = new Set([
   'As soon as possible',

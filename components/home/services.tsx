@@ -38,6 +38,13 @@ const SERVICES = [
     href: '/services/iot-solutions',
     signature: 'iot',
   },
+  {
+    number: '05',
+    name: 'AI & Automation',
+    description: 'Intelligent workflows and custom AI models that eliminate repetitive operations.',
+    href: '/services/ai-automation',
+    signature: 'ai',
+  },
 ] as const
 
 /* -------------------------------------------------------------------------- */
@@ -395,11 +402,96 @@ function IotSignature() {
   )
 }
 
+function AiSignature() {
+  return (
+    <svg viewBox="0 0 320 140" fill="none" className="h-full w-full">
+      {/* Connecting Neural / Automation Lines */}
+      <g data-ai-lines opacity="0.3">
+        <path d="M46 70 L120 42" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M46 70 L120 98" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M120 42 L200 42" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 4" />
+        <path d="M120 98 L200 98" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 4" />
+        <path d="M120 42 L200 98" stroke="var(--signal)" strokeWidth="1.2" opacity="0.4" />
+        <path d="M120 98 L200 42" stroke="var(--signal)" strokeWidth="1.2" opacity="0.4" />
+        <path d="M200 42 L274 70" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M200 98 L274 70" stroke="currentColor" strokeWidth="1.5" />
+      </g>
+
+      {/* Input Trigger Node */}
+      <g data-ai-node="input" className="origin-center">
+        <rect
+          x="22"
+          y="48"
+          width="48"
+          height="44"
+          rx="2"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeOpacity="0.4"
+        />
+        <circle cx="46" cy="70" r="5" fill="var(--signal)" />
+        <circle cx="46" cy="70" r="10" stroke="var(--signal)" strokeWidth="1.5" opacity="0.5" />
+      </g>
+
+      {/* Hidden Processing Nodes */}
+      <g data-ai-layer="1">
+        <g data-ai-node="hidden-top" className="origin-center">
+          <circle cx="120" cy="42" r="12" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.5" />
+          <circle cx="120" cy="42" r="4" fill="currentColor" opacity="0.75" />
+        </g>
+        <g data-ai-node="hidden-bottom" className="origin-center">
+          <circle cx="120" cy="98" r="12" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.5" />
+          <circle cx="120" cy="98" r="4" fill="currentColor" opacity="0.75" />
+        </g>
+      </g>
+
+      <g data-ai-layer="2">
+        <g data-ai-node="hidden-2-top" className="origin-center">
+          <circle cx="200" cy="42" r="12" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.5" />
+          <circle cx="200" cy="42" r="4" fill="currentColor" opacity="0.75" />
+        </g>
+        <g data-ai-node="hidden-2-bottom" className="origin-center">
+          <circle cx="200" cy="98" r="12" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.5" />
+          <circle cx="200" cy="98" r="4" fill="currentColor" opacity="0.75" />
+        </g>
+      </g>
+
+      {/* Output Action Node */}
+      <g data-ai-node="output" className="origin-center">
+        <rect
+          x="250"
+          y="48"
+          width="48"
+          height="44"
+          rx="2"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeOpacity="0.4"
+        />
+        <path
+          d="M266 70 L273 77 L284 64"
+          stroke="var(--signal)"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </g>
+
+      {/* Data Sparks / Signals */}
+      <circle data-ai-spark="1" cx="46" cy="70" r="3" fill="var(--signal)" style={{ opacity: 0 }} />
+      <circle data-ai-spark="2" cx="120" cy="42" r="3" fill="var(--signal)" style={{ opacity: 0 }} />
+      <circle data-ai-spark="3" cx="120" cy="98" r="3" fill="var(--signal)" style={{ opacity: 0 }} />
+      <circle data-ai-spark="4" cx="200" cy="70" r="3" fill="var(--signal)" style={{ opacity: 0 }} />
+    </svg>
+  )
+}
+
 function Signature({ type }: { type: (typeof SERVICES)[number]['signature'] }) {
   if (type === 'saas') return <SaasSignature />
   if (type === 'web') return <WebSignature />
   if (type === 'mobile') return <MobileSignature />
-  return <IotSignature />
+  if (type === 'iot') return <IotSignature />
+  return <AiSignature />
 }
 
 /* -------------------------------------------------------------------------- */
@@ -417,9 +509,9 @@ export function Services() {
   const [isTouchDevice, setIsTouchDevice] = useState(false)
 
   const activeIndexRef = useRef<number | null>(null)
-  const timelinesRef = useRef<(gsap.core.Timeline | null)[]>([null, null, null, null])
-  const reverseTweensRef = useRef<(gsap.core.Tween | null)[]>([null, null, null, null])
-  const playedOnceRef = useRef<boolean[]>([false, false, false, false])
+  const timelinesRef = useRef<(gsap.core.Timeline | null)[]>([null, null, null, null, null])
+  const reverseTweensRef = useRef<(gsap.core.Tween | null)[]>([null, null, null, null, null])
+  const playedOnceRef = useRef<boolean[]>([false, false, false, false, false])
 
   // Detect reduced motion and touch devices
   useEffect(() => {
@@ -547,10 +639,52 @@ export function Services() {
       return tl
     }
 
-    // IoT
-    const sensor = row.querySelector('[data-iot-sensor]')
-    const cloud = row.querySelector('[data-iot-cloud]')
-    const packets = row.querySelectorAll('[data-iot-packet]')
+    if (type === 'iot') {
+      const sensor = row.querySelector('[data-iot-sensor]')
+      const cloud = row.querySelector('[data-iot-cloud]')
+      const packets = row.querySelectorAll('[data-iot-packet]')
+
+      const tl = gsap.timeline({
+        paused: true,
+        repeat: -1,
+        repeatDelay: 0.4,
+        defaults: { ease: 'power3.out' },
+      })
+
+      tl.to(sensor, { scale: 1.08, duration: 0.5, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 0.1)
+
+      packets.forEach((packet, pIdx) => {
+        tl.fromTo(
+          packet,
+          { x: 0, autoAlpha: 0 },
+          {
+            x: 175,
+            autoAlpha: 0.9,
+            duration: 1.4,
+            ease: 'sine.inOut',
+            onUpdate: function () {
+              const prog = this.progress()
+              // Fade out near end of line
+              if (prog > 0.85) {
+                gsap.set(packet, { autoAlpha: (1 - prog) / 0.15 })
+              }
+            },
+          },
+          0.25 + pIdx * 0.35,
+        )
+      })
+
+      tl.to(cloud, { scale: 1.06, duration: 0.6, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 1.4)
+
+      return tl
+    }
+
+    // AI & Automation
+    const input = row.querySelector('[data-ai-node="input"]')
+    const hidden1 = row.querySelectorAll('[data-ai-layer="1"] [data-ai-node]')
+    const hidden2 = row.querySelectorAll('[data-ai-layer="2"] [data-ai-node]')
+    const output = row.querySelector('[data-ai-node="output"]')
+    const sparks = row.querySelectorAll('[data-ai-spark]')
 
     const tl = gsap.timeline({
       paused: true,
@@ -559,30 +693,34 @@ export function Services() {
       defaults: { ease: 'power3.out' },
     })
 
-    tl.to(sensor, { scale: 1.08, duration: 0.5, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 0.1)
+    // Input node pulse
+    tl.to(input, { scale: 1.1, duration: 0.4, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 0.1)
 
-    packets.forEach((packet, pIdx) => {
+    // Data sparks propagate across layers
+    sparks.forEach((spark, sIdx) => {
       tl.fromTo(
-        packet,
+        spark,
         { x: 0, autoAlpha: 0 },
         {
-          x: 175,
-          autoAlpha: 0.9,
-          duration: 1.4,
+          x: 48 + sIdx * 52,
+          autoAlpha: 1,
+          duration: 1.2,
           ease: 'sine.inOut',
           onUpdate: function () {
             const prog = this.progress()
-            // Fade out near end of line
-            if (prog > 0.85) {
-              gsap.set(packet, { autoAlpha: (1 - prog) / 0.15 })
-            }
+            if (prog > 0.8) gsap.set(spark, { autoAlpha: (1 - prog) / 0.2 })
           },
         },
-        0.25 + pIdx * 0.35,
+        0.2 + sIdx * 0.25,
       )
     })
 
-    tl.to(cloud, { scale: 1.06, duration: 0.6, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 1.4)
+    // Hidden layers process
+    tl.to(hidden1, { scale: 1.15, duration: 0.4, stagger: 0.1, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 0.4)
+    tl.to(hidden2, { scale: 1.15, duration: 0.4, stagger: 0.1, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 0.8)
+
+    // Output executes automation
+    tl.to(output, { scale: 1.1, duration: 0.45, yoyo: true, repeat: 1, ease: 'back.out(2)' }, 1.3)
 
     return tl
   }, [])

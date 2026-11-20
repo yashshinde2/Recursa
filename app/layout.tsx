@@ -77,7 +77,7 @@ export default function RootLayout({
     name: SITE.name,
     url: canonicalUrl('/'),
     logo: canonicalUrl('/icon.svg'),
-    email: 'hello@recursa.com',
+    email: 'recursatechnologies@gmail.com',
     description: SITE.description,
   }
   const websiteJsonLd = {

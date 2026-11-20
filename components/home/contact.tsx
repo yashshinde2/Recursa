@@ -8,7 +8,7 @@ const STEPS = [
   {
     label: '01 / NEED',
     question: 'What are you looking to build?',
-    options: ['SaaS', 'Web', 'Mobile', 'IoT', 'Not sure'],
+    options: ['SaaS', 'Web', 'Mobile', 'IoT', 'AI & Automation', 'Not sure'],
     field: 'need',
   },
   {
@@ -113,6 +113,15 @@ export function Contact() {
         return
       }
       setSent(true)
+
+      const mailtoUrl = `mailto:recursatechnologies@gmail.com?subject=${encodeURIComponent(
+        `Project Enquiry from ${details.name} (${details.need})`,
+      )}&body=${encodeURIComponent(
+        `Name: ${details.name}\nEmail: ${details.email}\nNeed: ${details.need}\nBudget: ${details.budget}\nTimeline: ${details.timeline}\n\nMessage:\n${details.message}`,
+      )}`
+      if (typeof window !== 'undefined') {
+        window.location.href = mailtoUrl
+      }
     } catch {
       setError('We could not reach the server. Please try again.')
     } finally {
@@ -141,7 +150,7 @@ export function Contact() {
           </p>
           <div className="mt-12 flex flex-col items-start gap-4 font-mono text-xs tracking-[0.12em] uppercase">
             <a
-              href="https://wa.me/?text=Hi%20Recursa%2C%20I%27d%20like%20to%20talk%20about%20a%20project."
+              href="https://wa.me/919096104433?text=Hi%20Recursa%2C%20I%27d%20like%20to%20talk%20about%20a%20project."
               target="_blank"
               rel="noopener noreferrer"
               className="border-b border-bone/30 pb-1 transition-colors hover:border-signal hover:text-signal"
@@ -149,10 +158,10 @@ export function Contact() {
               Message us on WhatsApp ↗
             </a>
             <a
-              href="mailto:hello@recursa.com?subject=Project%20enquiry"
+              href="mailto:recursatechnologies@gmail.com?subject=Project%20enquiry"
               className="border-b border-bone/30 pb-1 transition-colors hover:border-signal hover:text-signal"
             >
-              hello@recursa.com ↗
+              recursatechnologies@gmail.com ↗
             </a>
           </div>
         </div>
@@ -177,8 +186,17 @@ export function Contact() {
                   Thanks for the idea.
                 </h3>
                 <p className="mt-6 max-w-lg text-sm leading-relaxed text-bone/65 md:text-base">
-                  Your project brief is ready. Email delivery is not connected yet, so your
-                  details have not been sent to our inbox.
+                  Your project brief is ready. If your email client did not open automatically,{' '}
+                  <a
+                    href={`mailto:recursatechnologies@gmail.com?subject=${encodeURIComponent(
+                      `Project Enquiry from ${details.name} (${details.need})`,
+                    )}&body=${encodeURIComponent(
+                      `Name: ${details.name}\nEmail: ${details.email}\nNeed: ${details.need}\nBudget: ${details.budget}\nTimeline: ${details.timeline}\n\nMessage:\n${details.message}`,
+                    )}`}
+                    className="text-signal underline underline-offset-4 hover:text-bone"
+                  >
+                    click here to send directly to recursatechnologies@gmail.com
+                  </a>.
                 </p>
               </div>
             ) : step < 3 ? (
