@@ -510,10 +510,10 @@ export function SelectedWork() {
             aria-labelledby={`tab-${displayedProject.slug}`}
             onPointerEnter={() => setIsHovered(true)}
             onPointerLeave={() => setIsHovered(false)}
-            className="flex flex-col justify-between gap-6 md:col-span-4"
+            className="flex flex-col justify-between gap-6 pl-0.5 md:col-span-4 md:pl-2"
           >
             <div className="flex flex-col gap-2">
-              <div className="overflow-hidden">
+              <div className="-mx-2 overflow-hidden px-2">
                 <p
                   data-reveal-item
                   className="font-mono text-xs uppercase tracking-wider text-muted-foreground"
@@ -521,7 +521,7 @@ export function SelectedWork() {
                   {displayedProject.category}
                 </p>
               </div>
-              <div className="overflow-hidden">
+              <div className="-mx-2 overflow-hidden px-2">
                 <h3
                   data-reveal-item
                   className="font-serif text-3xl leading-[1.05] text-ink md:text-4xl lg:text-5xl text-balance"
@@ -532,10 +532,10 @@ export function SelectedWork() {
             </div>
 
             <dl className="space-y-3 border-t border-ink/15 pt-4">
-              <div className="overflow-hidden">
+              <div className="-mx-2 overflow-hidden px-2">
                 <div
                   data-reveal-item
-                  className="grid grid-cols-[5rem_1fr] gap-3 text-sm md:text-base"
+                  className="grid grid-cols-[5.25rem_1fr] gap-3 text-sm md:text-base"
                 >
                   <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
                     Problem
@@ -543,10 +543,10 @@ export function SelectedWork() {
                   <dd className="text-ink/80">{displayedProject.problem}</dd>
                 </div>
               </div>
-              <div className="overflow-hidden">
+              <div className="-mx-2 overflow-hidden px-2">
                 <div
                   data-reveal-item
-                  className="grid grid-cols-[5rem_1fr] gap-3 text-sm md:text-base"
+                  className="grid grid-cols-[5.25rem_1fr] gap-3 text-sm md:text-base"
                 >
                   <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
                     Built
@@ -554,10 +554,10 @@ export function SelectedWork() {
                   <dd className="text-ink/80">{displayedProject.built}</dd>
                 </div>
               </div>
-              <div className="overflow-hidden">
+              <div className="-mx-2 overflow-hidden px-2">
                 <div
                   data-reveal-item
-                  className="grid grid-cols-[5rem_1fr] gap-3 text-sm md:text-base"
+                  className="grid grid-cols-[5.25rem_1fr] gap-3 text-sm md:text-base"
                 >
                   <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
                     Result
@@ -567,7 +567,7 @@ export function SelectedWork() {
               </div>
             </dl>
 
-            <div className="overflow-hidden pt-2">
+            <div className="-mx-2 overflow-hidden px-2 pt-2">
               <div data-reveal-item>
                 <a
                   href={displayedProject.url}

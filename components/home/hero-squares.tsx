@@ -96,17 +96,17 @@ export function HeroSquares() {
       <div
         data-hero-squares
         data-reveal="pending"
-        className="absolute top-1/2 left-1/2 aspect-square h-[135%] -translate-x-1/2 -translate-y-1/2 lg:left-[64%]"
+        className="absolute top-1/2 left-1/2 aspect-square h-[135%] -translate-x-1/2 -translate-y-1/2 transform-gpu lg:left-[64%]"
       >
         {SQUARES.map((square) => (
           <div
             key={square.turn}
             data-square-layer
-            className="absolute inset-0 flex items-center justify-center"
+            className="absolute inset-0 flex items-center justify-center transform-gpu"
           >
             <div
               data-square
-              className="aspect-square border border-steel/15"
+              className="aspect-square border border-steel/15 transform-gpu"
               style={{ width: `${square.size}%`, rotate: `${square.turn}deg` }}
             />
           </div>

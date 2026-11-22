@@ -189,10 +189,25 @@
 
   @media (hover: hover) and (pointer: fine) {
     .has-custom-cursor,
-    .has-custom-cursor * {
+    .has-custom-cursor *:not(dialog, dialog *, [role='dialog'], [role='dialog'] *) {
       cursor: none !important;
     }
 
+    dialog,
+    dialog *,
+    [role='dialog'],
+    [role='dialog'] * {
+      cursor: default !important;
+    }
+
+    dialog button,
+    dialog a,
+    dialog [role='button'],
+    [role='dialog'] button,
+    [role='dialog'] a,
+    [role='dialog'] [role='button'] {
+      cursor: pointer !important;
+    }
   }
 
   [data-theme] {

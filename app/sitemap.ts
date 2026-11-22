@@ -5,7 +5,7 @@ import { SERVICES } from '@/data/services'
 import { canonicalUrl } from '@/lib/seo'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const staticPages = ['/', '/about', '/journey']
+  const staticPages = ['/', '/about', '/journey', '/team']
   return [
     ...staticPages.map((path) => ({
       url: canonicalUrl(path),

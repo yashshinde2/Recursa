@@ -125,7 +125,7 @@ export function JourneyLightbox({
         // Close if click backdrop
         if (e.target === dialogRef.current) onClose()
       }}
-      className="backdrop:bg-black/85 fixed inset-0 m-auto flex h-full max-h-none w-full max-w-none flex-col items-center justify-between bg-transparent p-4 text-bone outline-none backdrop:backdrop-blur-sm sm:p-6 md:p-8"
+      className="backdrop:bg-black/85 fixed inset-0 m-auto flex h-full max-h-none w-full max-w-none cursor-default flex-col items-center justify-between bg-transparent p-4 text-bone outline-none backdrop:backdrop-blur-sm sm:p-6 md:p-8"
     >
       {/* Top Header bar */}
       <div className="flex w-full max-w-5xl items-center justify-between px-2 pt-2">
@@ -141,7 +141,7 @@ export function JourneyLightbox({
           type="button"
           onClick={onClose}
           aria-label="Close photo gallery"
-          className="inline-flex size-11 items-center justify-center rounded-[2px] border border-bone/20 font-mono text-xs uppercase tracking-wider text-bone/80 transition-colors hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-signal"
+          className="inline-flex size-11 cursor-pointer items-center justify-center rounded-[2px] border border-bone/20 font-mono text-xs uppercase tracking-wider text-bone/80 transition-colors hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-signal"
         >
           ✕
         </button>
@@ -183,7 +183,7 @@ export function JourneyLightbox({
               type="button"
               onClick={handlePrev}
               aria-label="Previous photo"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-[2px] border border-bone/25 px-4 font-mono text-xs uppercase tracking-wider text-bone transition-colors hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-signal"
+              className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-[2px] border border-bone/25 px-4 font-mono text-xs uppercase tracking-wider text-bone transition-colors hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-signal"
             >
               ← Prev
             </button>
@@ -191,7 +191,7 @@ export function JourneyLightbox({
               type="button"
               onClick={handleNext}
               aria-label="Next photo"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-[2px] border border-bone/25 px-4 font-mono text-xs uppercase tracking-wider text-bone transition-colors hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-signal"
+              className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-[2px] border border-bone/25 px-4 font-mono text-xs uppercase tracking-wider text-bone transition-colors hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-signal"
             >
               Next →
             </button>

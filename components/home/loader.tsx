@@ -156,7 +156,7 @@ export function Loader({ inlineSessionCheck, onReveal, onDone }: LoaderProps) {
       // The inline script may have hidden this element before hydration.
       suppressHydrationWarning
       onClick={() => skipRef.current()}
-      className="fixed inset-0 z-[90] flex cursor-pointer items-center justify-center text-bone motion-reduce:hidden"
+      className="fixed inset-0 z-[90] flex cursor-pointer items-center justify-center text-bone motion-reduce:hidden transform-gpu"
     >
       {inlineSessionCheck && (
         <script dangerouslySetInnerHTML={{ __html: HIDE_IF_SEEN }} />

@@ -2,9 +2,9 @@ export const SITE = {
   name: 'Recursa Technologies',
   shortName: 'Recursa',
   url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://recursa.com',
-  tagline: 'Software for SaaS, Web, Mobile & IoT',
+  tagline: 'Software for SaaS, Web, Mobile, AI & Automation, IoT',
   description:
-    'Recursa Technologies is a software company building SaaS platforms, web and mobile applications, and connected IoT products.',
+    'Recursa Technologies is a software company building SaaS platforms, web and mobile applications, AI & automation systems, and connected IoT products.',
 } as const
 
 export const NAV_LINKS = [

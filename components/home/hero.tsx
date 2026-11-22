@@ -43,6 +43,7 @@ export function Hero({ ready }: HeroProps) {
         const cue = select('[data-hero-cue]')[0]
         const logo = select('[data-hero-logo]:not([data-hero-logo-m])')[0] as HTMLElement
         const glow = select('[data-hero-glow]')[0] as HTMLElement
+        const float = select('[data-hero-float]')[0] as HTMLElement
         const tilt = select('[data-hero-tilt]')[0] as HTMLElement
         const logoM = select('[data-hero-logo-m]')[0] as HTMLElement
         const glowM = select('[data-hero-glow-m]')[0] as HTMLElement
@@ -53,9 +54,9 @@ export function Hero({ ready }: HeroProps) {
           element.dataset.reveal = 'ready'
         }
 
-        if (logo) gsap.set(logo, { autoAlpha: 0, scale: 0.72, y: 30 })
+        if (logo) gsap.set(logo, { autoAlpha: 0, scale: 0.72, y: 30, willChange: 'transform, opacity' })
         if (glow) gsap.set(glow, { autoAlpha: 0 })
-        if (logoM) gsap.set(logoM, { autoAlpha: 0, scale: 0.8, y: 20 })
+        if (logoM) gsap.set(logoM, { autoAlpha: 0, scale: 0.8, y: 20, willChange: 'transform, opacity' })
         if (glowM) gsap.set(glowM, { autoAlpha: 0 })
 
         gsap.fromTo(
@@ -125,14 +126,15 @@ export function Hero({ ready }: HeroProps) {
             delay: 0.35,
             ease: 'power3.out',
             onComplete: () => {
-              if (tilt) {
+              gsap.set(logo, { willChange: 'auto' })
+              if (float) {
                 const floatY = gsap.fromTo(
-                  tilt,
+                  float,
                   { y: -10 },
                   { y: 10, duration: 5, ease: 'sine.inOut', yoyo: true, repeat: -1 },
                 )
                 const floatRot = gsap.fromTo(
-                  tilt,
+                  float,
                   { rotation: -0.6 },
                   { rotation: 0.6, duration: 9, ease: 'sine.inOut', yoyo: true, repeat: -1 },
                 )
@@ -298,21 +300,24 @@ export function Hero({ ready }: HeroProps) {
             {/* Logo outer for float/entrance, inner for mouse tilt */}
             <div
               data-hero-logo
+              className="transform-gpu"
               style={{
                 transform: `translateY(${LOGO_NUDGE_Y}%)`,
               }}
             >
-              <div data-hero-tilt className="will-change-transform">
-                <Image
-                  src="/brand/recursa-3d-hero.webp"
-                  width={1400}
-                  height={832}
-                  alt=""
-                  sizes="(min-width: 1024px) 34vw, 70vw"
-                  priority
-                  draggable={false}
-                  className="h-auto w-[clamp(300px,28vw,540px)] select-none"
-                />
+              <div data-hero-float className="transform-gpu">
+                <div data-hero-tilt className="transform-gpu will-change-transform">
+                  <Image
+                    src="/brand/recursa-3d-hero.webp"
+                    width={1400}
+                    height={832}
+                    alt="Recursa Technologies 3D Logo — Software & Product Engineering"
+                    sizes="(min-width: 1024px) 34vw, 70vw"
+                    priority
+                    draggable={false}
+                    className="h-auto w-[clamp(300px,28vw,540px)] select-none"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -324,7 +329,7 @@ export function Hero({ ready }: HeroProps) {
         <div
           data-hero-logo
           data-hero-logo-m
-          className="relative self-end -mr-3 mb-6 w-[min(64vw,320px)] lg:hidden"
+          className="relative self-end -mr-3 mb-6 w-[min(64vw,320px)] transform-gpu lg:hidden"
         >
           <div
             data-hero-glow-m
@@ -335,13 +340,13 @@ export function Hero({ ready }: HeroProps) {
                 'radial-gradient(circle, rgba(255, 90, 31, 0.18) 0%, rgba(255, 90, 31, 0) 70%)',
             }}
           />
-          <div data-hero-float-m className="will-change-transform">
+          <div data-hero-float-m className="transform-gpu will-change-transform">
             <Image
               src="/brand/recursa-3d-hero.webp"
               width={1400}
               height={832}
-              alt=""
-              loading="lazy"
+              alt="Recursa Technologies 3D Logo — Software & Product Engineering"
+              priority
               draggable={false}
               className="h-auto w-full select-none"
             />
